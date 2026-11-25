@@ -204,7 +204,7 @@
         <div class="flex flex-wrap gap-2">
           <button id="tab-mod1" onclick="switchModule(1)" class="px-4 py-2.5 rounded-xl font-bold text-sm flex items-center gap-2 bg-yellow-400 text-black transition">
             <i class="fa-solid fa-coins"></i>
-            <span>Módulo 1: Juntar Valores</span>
+            <span>Módulo 1: Juntar Valores (10 Questões)</span>
           </button>
           <button id="tab-mod2" onclick="switchModule(2)" class="px-4 py-2.5 rounded-xl font-bold text-sm flex items-center gap-2 bg-zinc-800 text-zinc-300 hover:bg-zinc-700 transition">
             <i class="fa-solid fa-cart-shopping"></i>
@@ -218,91 +218,160 @@
             <span id="student-level-badge" class="font-bold text-yellow-400 ml-1">Nível 2</span>
           </div>
           <div class="bg-zinc-950 border border-zinc-800 px-3 py-1.5 rounded-lg">
-            <span class="text-zinc-400">Acertos na Sessão:</span>
+            <span class="text-zinc-400">Acertos:</span>
             <span id="session-score" class="font-bold text-emerald-400 ml-1">0</span>
           </div>
         </div>
       </div>
 
       <!-- =======================================================
-           MÓDULO 1: JUNTAR UM DETERMINADO VALOR
+           MÓDULO 1: JUNTAR UM DETERMINADO VALOR (10 QUESTÕES + RESULTADO FINAL)
            ======================================================= -->
       <div id="module-1-container" class="space-y-6">
-        <div class="bg-zinc-900 border-2 border-yellow-400/50 rounded-2xl p-5 sm:p-6 shadow-xl">
-          <div class="flex flex-wrap items-center justify-between gap-4">
-            <div class="space-y-1 flex-1">
-              <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-yellow-400/15 text-yellow-300 text-xs font-bold uppercase tracking-wider">
-                <i class="fa-solid fa-shuffle"></i> Composição de Valor
-              </div>
-              <h2 id="m1-prompt-title" class="text-2xl sm:text-3xl font-extrabold text-white leading-snug pt-1">
-                Carregando valor...
-              </h2>
-              <p class="text-sm text-zinc-400">
-                Selecione cédulas e moedas abaixo até juntar exatamente a quantia solicitada.
-              </p>
+
+        <!-- ÁREA DE RESOLUÇÃO DAS 10 QUESTÕES -->
+        <div id="m1-quiz-active" class="space-y-6">
+          <!-- Barra de Progresso das 10 Questões -->
+          <div class="bg-zinc-900 border border-zinc-800 rounded-2xl p-4 space-y-2">
+            <div class="flex items-center justify-between text-xs sm:text-sm font-bold">
+              <span id="m1-question-counter" class="text-yellow-400">Questão 1 de 10</span>
+              <span id="m1-progress-percent" class="text-zinc-400">0% concluído</span>
             </div>
-            <button onclick="generateExchangeChallenge()" class="bg-zinc-800 hover:bg-zinc-700 text-zinc-200 border border-zinc-700 px-4 py-2.5 rounded-xl text-xs font-bold flex items-center gap-2 transition">
-              <i class="fa-solid fa-rotate"></i>
-              <span>Novo Valor</span>
-            </button>
+            <div class="w-full h-2.5 bg-zinc-950 rounded-full overflow-hidden border border-zinc-800">
+              <div id="m1-progress-bar" class="h-full bg-yellow-400 transition-all duration-300" style="width: 0%"></div>
+            </div>
           </div>
-        </div>
 
-        <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
-          <!-- Bandeja de Montagem (5 colunas) -->
-          <div class="lg:col-span-5 bg-zinc-900 border border-zinc-800 rounded-2xl p-5 flex flex-col justify-between">
-            <div>
-              <div class="flex items-center justify-between border-b border-zinc-800 pb-3 mb-4">
-                <h3 class="font-bold text-white flex items-center gap-2">
-                  <i class="fa-solid fa-hand-holding-dollar text-yellow-400"></i>
-                  <span>Dinheiro Reunido</span>
-                </h3>
-                <button onclick="clearM1Tray()" class="text-xs text-red-400 hover:text-red-300 font-semibold flex items-center gap-1">
-                  <i class="fa-solid fa-trash-can"></i> Limpar
-                </button>
+          <!-- Card do Desafio Atual -->
+          <div class="bg-zinc-900 border-2 border-yellow-400/50 rounded-2xl p-5 sm:p-6 shadow-xl">
+            <div class="flex flex-wrap items-center justify-between gap-4">
+              <div class="space-y-1 flex-1">
+                <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-yellow-400/15 text-yellow-300 text-xs font-bold uppercase tracking-wider">
+                  <i class="fa-solid fa-coins"></i> Composição de Valor
+                </div>
+                <h2 id="m1-prompt-title" class="text-2xl sm:text-3xl font-extrabold text-white leading-snug pt-1">
+                  Carregando valor...
+                </h2>
+                <p class="text-sm text-zinc-400">
+                  Selecione cédulas e moedas abaixo até juntar exatamente a quantia solicitada e clique em <strong>Responder Questão</strong>.
+                </p>
               </div>
-
-              <div id="m1-tray-items" class="min-h-[190px] max-h-[300px] overflow-y-auto bg-zinc-950 border border-dashed border-zinc-700 rounded-xl p-3 flex flex-wrap content-start gap-2">
-                <p class="text-zinc-500 text-sm m-auto text-center">Clique nas moedas ou cédulas ao lado para juntar o valor pedido.</p>
-              </div>
-            </div>
-
-            <div class="mt-4 pt-4 border-t border-zinc-800 space-y-3">
-              <div class="flex items-center justify-between text-sm">
-                <span class="text-zinc-400">Quantidade de peças:</span>
-                <span id="m1-piece-count" class="font-bold text-white">0 peças</span>
-              </div>
-              <div id="m1-auto-sum-row" class="flex items-center justify-between text-base">
-                <span class="text-zinc-400">Total reunido:</span>
-                <span id="m1-tray-total" class="font-extrabold text-xl text-yellow-400">R$ 0,00</span>
-              </div>
-
-              <div id="m1-feedback" class="hidden p-3 rounded-xl text-sm font-semibold"></div>
-
-              <button onclick="checkM1Answer()" class="w-full bg-emerald-500 hover:bg-emerald-400 text-black font-extrabold py-3.5 rounded-xl text-base shadow-lg transition flex items-center justify-center gap-2">
-                <i class="fa-solid fa-check-double"></i>
-                <span>Conferir Valor</span>
+              <button onclick="startNewM1Quiz()" class="bg-zinc-800 hover:bg-zinc-700 text-zinc-200 border border-zinc-700 px-4 py-2.5 rounded-xl text-xs font-bold flex items-center gap-2 transition">
+                <i class="fa-solid fa-rotate"></i>
+                <span>Reiniciar 10 Questões</span>
               </button>
             </div>
           </div>
 
-          <!-- Banco Completo de Moedas e Cédulas (7 colunas) -->
-          <div class="lg:col-span-7 bg-zinc-900 border border-zinc-800 rounded-2xl p-5 space-y-5">
-            <div>
-              <h3 class="text-xs font-bold uppercase tracking-wider text-zinc-400 mb-3 flex items-center gap-2">
-                <i class="fa-solid fa-coins text-yellow-400"></i> Moedas (Clique para adicionar)
-              </h3>
-              <div id="m1-coins-palette" class="grid grid-cols-3 sm:grid-cols-6 gap-3"></div>
+          <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+            <!-- Bandeja de Montagem (5 colunas) -->
+            <div class="lg:col-span-5 bg-zinc-900 border border-zinc-800 rounded-2xl p-5 flex flex-col justify-between">
+              <div>
+                <div class="flex items-center justify-between border-b border-zinc-800 pb-3 mb-4">
+                  <h3 class="font-bold text-white flex items-center gap-2">
+                    <i class="fa-solid fa-hand-holding-dollar text-yellow-400"></i>
+                    <span>Dinheiro Reunido</span>
+                  </h3>
+                  <button onclick="clearM1Tray()" class="text-xs text-red-400 hover:text-red-300 font-semibold flex items-center gap-1">
+                    <i class="fa-solid fa-trash-can"></i> Limpar
+                  </button>
+                </div>
+
+                <div id="m1-tray-items" class="min-h-[190px] max-h-[300px] overflow-y-auto bg-zinc-950 border border-dashed border-zinc-700 rounded-xl p-3 flex flex-wrap content-start gap-2">
+                  <p class="text-zinc-500 text-sm m-auto text-center">Clique nas moedas ou cédulas ao lado para juntar o valor pedido.</p>
+                </div>
+              </div>
+
+              <div class="mt-4 pt-4 border-t border-zinc-800 space-y-3">
+                <div class="flex items-center justify-between text-sm">
+                  <span class="text-zinc-400">Quantidade de peças:</span>
+                  <span id="m1-piece-count" class="font-bold text-white">0 peças</span>
+                </div>
+                <div id="m1-auto-sum-row" class="flex items-center justify-between text-base">
+                  <span class="text-zinc-400">Total reunido:</span>
+                  <span id="m1-tray-total" class="font-extrabold text-xl text-yellow-400">R$ 0,00</span>
+                </div>
+
+                <div id="m1-feedback" class="hidden p-3 rounded-xl text-sm font-semibold"></div>
+
+                <button id="m1-submit-btn" onclick="submitM1Question()" class="w-full bg-emerald-500 hover:bg-emerald-400 text-black font-extrabold py-3.5 rounded-xl text-base shadow-lg transition flex items-center justify-center gap-2">
+                  <i class="fa-solid fa-check-double"></i>
+                  <span>Responder Questão</span>
+                </button>
+              </div>
             </div>
 
-            <div class="border-t border-zinc-800 pt-4">
-              <h3 class="text-xs font-bold uppercase tracking-wider text-zinc-400 mb-3 flex items-center gap-2">
-                <i class="fa-solid fa-money-bill-wave text-emerald-400"></i> Cédulas (Clique para adicionar)
-              </h3>
-              <div id="m1-bills-palette" class="grid grid-cols-2 sm:grid-cols-4 gap-3"></div>
+            <!-- Banco Completo de Moedas e Cédulas (7 colunas) -->
+            <div class="lg:col-span-7 bg-zinc-900 border border-zinc-800 rounded-2xl p-5 space-y-5">
+              <div>
+                <h3 class="text-xs font-bold uppercase tracking-wider text-zinc-400 mb-3 flex items-center gap-2">
+                  <i class="fa-solid fa-coins text-yellow-400"></i> Moedas (Clique para adicionar)
+                </h3>
+                <div id="m1-coins-palette" class="grid grid-cols-3 sm:grid-cols-6 gap-3"></div>
+              </div>
+
+              <div class="border-t border-zinc-800 pt-4">
+                <h3 class="text-xs font-bold uppercase tracking-wider text-zinc-400 mb-3 flex items-center gap-2">
+                  <i class="fa-solid fa-money-bill-wave text-emerald-400"></i> Cédulas (Clique para adicionar)
+                </h3>
+                <div id="m1-bills-palette" class="grid grid-cols-2 sm:grid-cols-4 gap-3"></div>
+              </div>
             </div>
           </div>
         </div>
+
+        <!-- TELA DE RESULTADO FINAL APÓS AS 10 QUESTÕES -->
+        <div id="m1-final-summary" class="hidden bg-zinc-900 border-2 border-emerald-500/50 rounded-2xl p-6 sm:p-8 shadow-2xl space-y-6">
+          <div class="text-center space-y-2">
+            <div class="inline-flex items-center justify-center w-16 h-16 rounded-full bg-emerald-500/15 border border-emerald-500/40 text-emerald-400 text-3xl mb-2">
+              <i class="fa-solid fa-award"></i>
+            </div>
+            <h2 class="text-2xl sm:text-3xl font-extrabold text-white">Resultado Final — Módulo 1 (10 Questões)</h2>
+            <p id="m1-summary-subtitle" class="text-sm text-zinc-400"></p>
+          </div>
+
+          <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+            <div class="bg-zinc-950 border border-zinc-800 rounded-xl p-4 text-center">
+              <span class="text-xs uppercase text-zinc-400 font-bold block">Acertos</span>
+              <span id="m1-res-correct" class="text-3xl font-extrabold text-emerald-400">0 / 10</span>
+            </div>
+            <div class="bg-zinc-950 border border-zinc-800 rounded-xl p-4 text-center">
+              <span class="text-xs uppercase text-zinc-400 font-bold block">Aproveitamento</span>
+              <span id="m1-res-percent" class="text-3xl font-extrabold text-yellow-400">0%</span>
+            </div>
+            <div class="bg-zinc-950 border border-zinc-800 rounded-xl p-4 text-center">
+              <span class="text-xs uppercase text-zinc-400 font-bold block">Questões Incorretas</span>
+              <span id="m1-res-wrong" class="text-3xl font-extrabold text-rose-400">0</span>
+            </div>
+          </div>
+
+          <div class="overflow-x-auto bg-zinc-950 border border-zinc-800 rounded-xl">
+            <table class="w-full text-left border-collapse text-xs sm:text-sm">
+              <thead>
+                <tr class="border-b border-zinc-800 text-zinc-300 bg-zinc-900">
+                  <th class="p-3">#</th>
+                  <th class="p-3">Valor Pedido</th>
+                  <th class="p-3">Valor Reunido</th>
+                  <th class="p-3">Peças Selecionadas</th>
+                  <th class="p-3 text-center">Resultado</th>
+                </tr>
+              </thead>
+              <tbody id="m1-summary-tbody" class="divide-y divide-zinc-800/80"></tbody>
+            </table>
+          </div>
+
+          <div class="flex flex-wrap items-center justify-center gap-4 pt-2">
+            <button onclick="startNewM1Quiz()" class="bg-yellow-400 hover:bg-yellow-300 text-black font-extrabold px-6 py-3.5 rounded-xl text-sm shadow-lg transition flex items-center gap-2">
+              <i class="fa-solid fa-play"></i>
+              <span>Iniciar Nova Sequência de 10 Questões</span>
+            </button>
+            <button onclick="switchModule(2)" class="bg-zinc-800 hover:bg-zinc-700 text-white font-bold px-6 py-3.5 rounded-xl text-sm transition flex items-center gap-2">
+              <span>Ir para o Módulo 2: Mercadinho & Troco</span>
+              <i class="fa-solid fa-arrow-right"></i>
+            </button>
+          </div>
+        </div>
+
       </div>
 
       <!-- =======================================================
@@ -346,7 +415,7 @@
                 </h3>
                 <span id="m2-wallet-total" class="font-extrabold text-yellow-400 text-base">R$ 0,00</span>
               </div>
-              <div id="m2-wallet-display" class="flex flex-wrap gap-2 bg-zinc-950 p-3 rounded-xl border border-zinc-800 min-h-[76px]"></div>
+              <div id="m2-wallet-display" class="grid grid-cols-2 sm:grid-cols-3 gap-2.5 bg-zinc-950 p-3 rounded-xl border border-zinc-800 min-h-[96px]"></div>
             </div>
 
             <div>
@@ -407,7 +476,7 @@
 
           <div class="bg-zinc-950/70 border border-zinc-800 rounded-xl p-4 space-y-3">
             <h4 class="text-sm font-bold text-yellow-400">Passo 1: Clique nas peças da sua carteira que você entregará ao operador de caixa</h4>
-            <div id="chk-wallet-selectable" class="flex flex-wrap gap-3"></div>
+            <div id="chk-wallet-selectable" class="grid grid-cols-2 sm:grid-cols-4 md:grid-cols-6 gap-3"></div>
           </div>
 
           <div class="bg-zinc-950/70 border border-zinc-800 rounded-xl p-4 space-y-4">
@@ -520,7 +589,7 @@
         </div>
       </div>
 
-      <!-- SUB-ABA 2: GERENCIADOR DE PRODUTOS DA LOJA (FIRESTORE + STORAGE) -->
+      <!-- SUB-ABA 2: GERENCIADOR DE PRODUTOS DA LOJA -->
       <div id="teacher-tab-products" class="no-print hidden space-y-6">
         <div class="bg-zinc-900 border border-zinc-800 rounded-2xl p-5 space-y-4">
           <div>
@@ -561,7 +630,6 @@
           </form>
         </div>
 
-        <!-- Lista de Produtos Cadastrados -->
         <div class="bg-zinc-900 border border-zinc-800 rounded-2xl p-5 space-y-4">
           <div class="flex items-center justify-between">
             <h3 class="font-bold text-white text-base">Inventário Cadastrado (<span id="products-count-label">0</span> itens)</h3>
@@ -764,10 +832,12 @@
     let sessionScore = 0;
     let allReports = [];
 
-    // Estado Módulo 1
-    let m1Challenge = null;
+    // Estado Módulo 1 (10 Questões)
+    const M1_TOTAL_QUESTIONS = 10;
+    let m1QuestionsList = [];
+    let m1CurrentIndex = 0;
     let m1Tray = [];
-    let m1Attempts = 0;
+    let m1Results = [];
 
     // Estado Módulo 2
     let m2Scenario = null;
@@ -825,7 +895,6 @@
             storeProducts = loaded;
             localStorage.setItem("fin_lab_products", JSON.stringify(storeProducts));
           } else {
-            // Seed inicial no Firestore se coleção estiver vazia
             for (const p of DEFAULT_PRODUCTS) {
               await setDoc(doc(db, "fin_educacao_produtos", p.id), p);
             }
@@ -838,6 +907,7 @@
       applySettingsToUI();
       renderAllPalettes();
       renderTeacherProductsList();
+      if (m2Scenario) renderM2Shop();
     }
 
     function applySettingsToUI() {
@@ -861,39 +931,50 @@
     }
 
     // =========================================================================
-    // 4. RENDERIZAÇÃO VISUAL DE CÉDULAS E MOEDAS
+    // 4. RENDERIZAÇÃO VISUAL DE CÉDULAS E MOEDAS (IMAGEM REAL OU FALLBACK)
     // =========================================================================
-    function createMoneyButtonHTML(item, onClickAttr) {
+    function createMoneyVisualHTML(item, compact = false) {
       if (item.imageUrl) {
         return `
-          <button type="button" onclick="${onClickAttr}" class="money-item bg-zinc-950 border border-zinc-700 rounded-xl p-2 flex flex-col items-center justify-between relative group">
-            <img src="${item.imageUrl}" alt="${item.label}" class="${item.type === 'coin' ? 'w-14 h-14 object-contain rounded-full' : 'w-full h-16 object-contain rounded'}" />
-            <span class="text-[11px] font-bold text-zinc-200 mt-1.5 group-hover:text-yellow-400">${item.short}</span>
-            <span class="text-[9px] text-zinc-500 leading-none">${item.type === 'coin' ? 'Moeda' : 'Cédula'}</span>
-          </button>
+          <div class="flex flex-col items-center justify-center w-full">
+            <img src="${item.imageUrl}" alt="${item.label}"
+                 class="${item.type === 'coin'
+                   ? (compact ? 'w-11 h-11 object-contain rounded-full' : 'w-14 h-14 object-contain rounded-full')
+                   : (compact ? 'w-full h-12 object-contain rounded' : 'w-full h-16 object-contain rounded')}" />
+            <span class="text-[11px] font-bold text-zinc-200 mt-1">${item.short}</span>
+            <span class="text-[9px] text-zinc-400 leading-none">${item.type === 'coin' ? 'Moeda' : 'Cédula'}</span>
+          </div>
         `;
       }
 
       if (item.type === "coin") {
         return `
-          <button type="button" onclick="${onClickAttr}" class="money-item bg-zinc-950 border border-zinc-800 rounded-xl p-2.5 flex flex-col items-center justify-center relative">
-            <div class="coin-circle w-14 h-14 ${item.color} font-extrabold text-xs">
+          <div class="flex flex-col items-center justify-center w-full">
+            <div class="coin-circle ${compact ? 'w-11 h-11 text-[11px]' : 'w-14 h-14 text-xs'} ${item.color} font-extrabold">
               <span>${item.short.replace("R$ ", "")}</span>
             </div>
-            <span class="text-[10px] font-semibold text-zinc-300 mt-1.5">${item.label}</span>
-          </button>
+            <span class="text-[10px] font-semibold text-zinc-300 mt-1">${item.label}</span>
+          </div>
         `;
       } else {
         return `
-          <button type="button" onclick="${onClickAttr}" class="money-item bg-zinc-950 border border-zinc-800 rounded-xl p-2 flex flex-col items-center justify-center relative">
-            <div class="bill-rect w-full h-14 ${item.color} font-extrabold text-sm px-2">
+          <div class="flex flex-col items-center justify-center w-full">
+            <div class="bill-rect w-full ${compact ? 'h-11 text-xs' : 'h-14 text-sm'} ${item.color} font-extrabold px-2">
               <span class="text-[9px] uppercase tracking-widest opacity-80">República</span>
               <span>${item.short}</span>
             </div>
             <span class="text-[10px] font-semibold text-zinc-300 mt-1">${item.label}</span>
-          </button>
+          </div>
         `;
       }
+    }
+
+    function createMoneyButtonHTML(item, onClickAttr) {
+      return `
+        <button type="button" onclick="${onClickAttr}" class="money-item bg-zinc-950 border border-zinc-800 rounded-xl p-2.5 flex flex-col items-center justify-between relative group">
+          ${createMoneyVisualHTML(item, false)}
+        </button>
+      `;
     }
 
     function renderAllPalettes() {
@@ -912,34 +993,60 @@
     }
 
     // =========================================================================
-    // 5. GERADOR ALEATÓRIO — MÓDULO 1 (APENAS JUNTAR UM DETERMINADO VALOR)
+    // 5. MÓDULO 1: SEQUÊNCIA DE 10 QUESTÕES + RESULTADO FINAL
     // =========================================================================
-    window.generateExchangeChallenge = function() {
-      m1Tray = [];
-      m1Attempts = 0;
-      document.getElementById("m1-feedback").classList.add("hidden");
-      renderM1Tray();
-
-      const diff = Number(appSettings.difficulty);
-      let targetCents = 0;
-
+    function generateSingleTargetCents(diff) {
       if (diff === 1) {
         const reais = Math.floor(Math.random() * 149) + 2;
-        targetCents = reais * 100;
+        return reais * 100;
       } else if (diff === 2) {
         const steps = Math.floor(Math.random() * 1700) + 21;
-        targetCents = steps * 5;
+        return steps * 5;
       } else {
-        targetCents = Math.floor(Math.random() * 9985) + 15;
+        return Math.floor(Math.random() * 9985) + 15;
+      }
+    }
+
+    window.startNewM1Quiz = function() {
+      const diff = Number(appSettings.difficulty);
+      const usedTargets = new Set();
+      m1QuestionsList = [];
+
+      while (m1QuestionsList.length < M1_TOTAL_QUESTIONS) {
+        const cents = generateSingleTargetCents(diff);
+        if (!usedTargets.has(cents)) {
+          usedTargets.add(cents);
+          m1QuestionsList.push({
+            number: m1QuestionsList.length + 1,
+            targetCents: cents,
+            title: `Junte o valor de ${formatBRL(cents)}`
+          });
+        }
       }
 
-      m1Challenge = {
-        targetCents,
-        title: `Junte o valor de ${formatBRL(targetCents)}`
-      };
+      m1CurrentIndex = 0;
+      m1Results = [];
+      document.getElementById("m1-final-summary").classList.add("hidden");
+      document.getElementById("m1-quiz-active").classList.remove("hidden");
 
-      document.getElementById("m1-prompt-title").textContent = m1Challenge.title;
+      loadM1Question(0);
     };
+
+    function loadM1Question(index) {
+      m1CurrentIndex = index;
+      m1Tray = [];
+      document.getElementById("m1-feedback").classList.add("hidden");
+      document.getElementById("m1-submit-btn").disabled = false;
+
+      const q = m1QuestionsList[index];
+      document.getElementById("m1-question-counter").textContent = `Questão ${q.number} de ${M1_TOTAL_QUESTIONS}`;
+      const pct = Math.round((index / M1_TOTAL_QUESTIONS) * 100);
+      document.getElementById("m1-progress-percent").textContent = `${pct}% concluído`;
+      document.getElementById("m1-progress-bar").style.width = `${pct}%`;
+
+      document.getElementById("m1-prompt-title").textContent = q.title;
+      renderM1Tray();
+    }
 
     window.addToM1Tray = function(denomId) {
       const item = DENOMINATIONS.find(d => d.id === denomId);
@@ -978,41 +1085,90 @@
       document.getElementById("m1-tray-total").textContent = formatBRL(totalCents);
     }
 
-    window.checkM1Answer = async function() {
-      if (!m1Challenge) return;
-      m1Attempts++;
+    window.submitM1Question = async function() {
+      const q = m1QuestionsList[m1CurrentIndex];
+      if (!q) return;
+
+      document.getElementById("m1-submit-btn").disabled = true;
+
       const totalCents = m1Tray.reduce((acc, i) => acc + i.cents, 0);
+      const isCorrect = totalCents === q.targetCents;
+      const summaryPieces = m1Tray.length > 0 ? m1Tray.map(i => i.short).join(" + ") : "Nenhuma peça";
+
+      m1Results.push({
+        number: q.number,
+        targetCents: q.targetCents,
+        selectedCents: totalCents,
+        piecesText: summaryPieces,
+        isCorrect
+      });
+
       const fb = document.getElementById("m1-feedback");
       fb.classList.remove("hidden", "bg-red-500/20", "text-red-300", "border-red-500/40", "bg-emerald-500/20", "text-emerald-300", "border-emerald-500/40");
       fb.classList.add("border");
 
-      if (totalCents !== m1Challenge.targetCents) {
+      if (isCorrect) {
+        sessionScore++;
+        document.getElementById("session-score").textContent = sessionScore;
+        fb.classList.add("bg-emerald-500/20", "text-emerald-300", "border-emerald-500/40");
+        fb.innerHTML = `<i class="fa-solid fa-circle-check mr-1"></i> Correto! Você juntou ${formatBRL(totalCents)}.`;
+      } else {
         fb.classList.add("bg-red-500/20", "text-red-300", "border-red-500/40");
-        const diffCents = Math.abs(m1Challenge.targetCents - totalCents);
-        const diffMsg = totalCents < m1Challenge.targetCents
-          ? `Faltam ${formatBRL(diffCents)} para completar ${formatBRL(m1Challenge.targetCents)}.`
-          : `Passou ${formatBRL(diffCents)} do valor pedido de ${formatBRL(m1Challenge.targetCents)}.`;
-        fb.innerHTML = `<i class="fa-solid fa-circle-xmark mr-1"></i> Você reuniu ${formatBRL(totalCents)}. ${diffMsg}`;
-        return;
+        fb.innerHTML = `<i class="fa-solid fa-circle-xmark mr-1"></i> Resposta registrada: você reuniu ${formatBRL(totalCents)}, mas o valor pedido era ${formatBRL(q.targetCents)}.`;
       }
 
-      fb.classList.add("bg-emerald-500/20", "text-emerald-300", "border-emerald-500/40");
-      fb.innerHTML = `<i class="fa-solid fa-circle-check mr-1"></i> Muito bem! Você juntou exatamente ${formatBRL(totalCents)}. Clique em "Novo Valor" para continuar.`;
-
-      sessionScore++;
-      document.getElementById("session-score").textContent = sessionScore;
-
-      const summaryPieces = m1Tray.map(i => i.short).join(" + ");
       await saveReportRecord({
         module: "Juntar Valores",
-        detail: `${m1Challenge.title} | Peças usadas: [${summaryPieces}]`,
-        attempts: m1Attempts,
-        status: "Concluído"
+        detail: `Q${q.number}/10 — Pediu ${formatBRL(q.targetCents)} | Reuniu ${formatBRL(totalCents)} [${summaryPieces}]`,
+        attempts: 1,
+        status: isCorrect ? "Acertou" : "Errou"
       });
+
+      setTimeout(() => {
+        if (m1CurrentIndex + 1 < M1_TOTAL_QUESTIONS) {
+          loadM1Question(m1CurrentIndex + 1);
+        } else {
+          showM1FinalSummary();
+        }
+      }, 1100);
     };
 
+    function showM1FinalSummary() {
+      document.getElementById("m1-progress-percent").textContent = `100% concluído`;
+      document.getElementById("m1-progress-bar").style.width = `100%`;
+
+      document.getElementById("m1-quiz-active").classList.add("hidden");
+      document.getElementById("m1-final-summary").classList.remove("hidden");
+
+      const correctCount = m1Results.filter(r => r.isCorrect).length;
+      const wrongCount = M1_TOTAL_QUESTIONS - correctCount;
+      const percent = Math.round((correctCount / M1_TOTAL_QUESTIONS) * 100);
+
+      document.getElementById("m1-summary-subtitle").textContent =
+        `Estudante: ${currentStudent ? currentStudent.name : "Aluno"} (${currentStudent ? currentStudent.className : ""}) — Nível ${appSettings.difficulty}`;
+      document.getElementById("m1-res-correct").textContent = `${correctCount} / ${M1_TOTAL_QUESTIONS}`;
+      document.getElementById("m1-res-percent").textContent = `${percent}%`;
+      document.getElementById("m1-res-wrong").textContent = String(wrongCount);
+
+      document.getElementById("m1-summary-tbody").innerHTML = m1Results.map(r => `
+        <tr>
+          <td class="p-3 font-bold text-zinc-300">Q${r.number}</td>
+          <td class="p-3 font-extrabold text-white">${formatBRL(r.targetCents)}</td>
+          <td class="p-3 font-bold ${r.isCorrect ? 'text-emerald-400' : 'text-rose-400'}">${formatBRL(r.selectedCents)}</td>
+          <td class="p-3 text-xs text-zinc-300">${r.piecesText}</td>
+          <td class="p-3 text-center">
+            <span class="px-2.5 py-1 rounded text-xs font-extrabold ${
+              r.isCorrect ? 'bg-emerald-500/20 text-emerald-300' : 'bg-rose-500/20 text-rose-300'
+            }">
+              ${r.isCorrect ? 'Correto' : 'Incorreto'}
+            </span>
+          </td>
+        </tr>
+      `).join("");
+    }
+
     // =========================================================================
-    // 6. MÓDULO 2: MERCADINHO COM INVENTÁRIO LIVRE DO PROFESSOR
+    // 6. MÓDULO 2: MERCADINHO COM IMAGENS NA CARTEIRA E INVENTÁRIO LIVRE
     // =========================================================================
     window.generateMarketScenario = function() {
       m2Cart = [];
@@ -1055,7 +1211,6 @@
       const walletItems = chosenIds.map(id => DENOMINATIONS.find(d => d.id === id));
       const walletTotalCents = walletItems.reduce((acc, i) => acc + i.cents, 0);
 
-      // Usa todos os produtos cadastrados pelo professor
       const activeProducts = storeProducts.length > 0 ? storeProducts : DEFAULT_PRODUCTS;
 
       m2Scenario = {
@@ -1072,10 +1227,12 @@
 
     function renderM2Shop() {
       document.getElementById("m2-wallet-total").textContent = formatBRL(m2Scenario.walletTotalCents);
+
+      // Renderiza a carteira usando as imagens reais já configuradas no sistema
       document.getElementById("m2-wallet-display").innerHTML = m2Scenario.walletItems.map(item => `
-        <span class="px-2.5 py-1 rounded-lg border text-xs font-bold ${item.color}">
-          ${item.short} (${item.type === 'coin' ? 'Moeda' : 'Cédula'})
-        </span>
+        <div class="bg-zinc-900 border border-zinc-800 rounded-xl p-2 flex flex-col items-center justify-center">
+          ${createMoneyVisualHTML(item, true)}
+        </div>
       `).join("");
 
       document.getElementById("m2-products-grid").innerHTML = m2Scenario.products.map(p => `
@@ -1213,13 +1370,15 @@
         const isSelected = m2SelectedWalletIndices.includes(idx);
         return `
           <button type="button" onclick="toggleWalletPieceForPayment(${idx})"
-                  class="px-4 py-2.5 rounded-xl border-2 text-xs font-extrabold transition flex items-center gap-2 ${
+                  class="p-2.5 rounded-xl border-2 transition flex flex-col items-center justify-center relative ${
                     isSelected
-                      ? 'border-yellow-400 bg-yellow-400 text-black scale-105 shadow-lg'
-                      : `${item.color} opacity-85 hover:opacity-100`
+                      ? 'border-yellow-400 bg-yellow-400/15 scale-105 shadow-lg'
+                      : 'border-zinc-800 bg-zinc-900 opacity-85 hover:opacity-100'
                   }">
-            <i class="fa-solid ${isSelected ? 'fa-square-check' : 'fa-square'}"></i>
-            <span>${item.short} (${item.type === 'coin' ? 'Moeda' : 'Cédula'})</span>
+            <span class="absolute top-1.5 right-1.5 text-xs ${isSelected ? 'text-yellow-400' : 'text-zinc-500'}">
+              <i class="fa-solid ${isSelected ? 'fa-square-check' : 'fa-square'}"></i>
+            </span>
+            ${createMoneyVisualHTML(item, true)}
           </button>
         `;
       }).join("");
@@ -1482,7 +1641,7 @@
       document.getElementById("screen-login").classList.add("hidden");
       document.getElementById("screen-student").classList.remove("hidden");
 
-      generateExchangeChallenge();
+      startNewM1Quiz();
       generateMarketScenario();
     });
 
@@ -1511,6 +1670,7 @@
         tab1.className = "px-4 py-2.5 rounded-xl font-bold text-sm flex items-center gap-2 bg-zinc-800 text-zinc-300 hover:bg-zinc-700 transition";
         mod2.classList.remove("hidden");
         mod1.classList.add("hidden");
+        if (m2Scenario) renderM2Shop();
       }
     };
 
@@ -1547,6 +1707,7 @@
       document.getElementById("screen-teacher").classList.add("hidden");
       if (currentStudent) {
         document.getElementById("screen-student").classList.remove("hidden");
+        if (m2Scenario) renderM2Shop();
       } else {
         document.getElementById("screen-login").classList.remove("hidden");
       }
@@ -1619,7 +1780,9 @@
           <td class="p-3 text-xs text-zinc-300 max-w-md">${r.detail}</td>
           <td class="p-3 text-center font-bold">${r.attempts}</td>
           <td class="p-3 text-center">
-            <span class="px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-300 text-xs font-bold">${r.status}</span>
+            <span class="px-2 py-0.5 rounded text-xs font-bold ${
+              r.status === "Errou" ? "bg-rose-500/20 text-rose-300" : "bg-emerald-500/20 text-emerald-300"
+            }">${r.status}</span>
           </td>
         </tr>
       `).join("");
@@ -1717,6 +1880,7 @@
 
       renderMediaManager();
       renderAllPalettes();
+      if (m2Scenario) renderM2Shop();
     };
 
     window.saveTeacherSettings = async function() {
@@ -1799,6 +1963,7 @@
           renderTeacherProductsList();
           renderAllPalettes();
           renderReportsTable();
+          if (m2Scenario) renderM2Shop();
           alert("Backup restaurado com sucesso!");
         } catch (err) {
           alert("Arquivo JSON inválido.");
