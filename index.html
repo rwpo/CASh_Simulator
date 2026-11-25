@@ -135,7 +135,7 @@
         <div>
           <h1 class="font-bold text-base sm:text-lg text-white leading-tight">Laboratório de Educação Financeira</h1>
           <p class="text-xs text-zinc-400 flex items-center gap-2">
-            <span>Trocas, Orçamento e Troco</span>
+            <span>Composição de Valores e Troco</span>
             <span id="firebase-status-badge" class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-semibold bg-zinc-800 text-zinc-300">
               <i class="fa-solid fa-circle text-[7px] text-amber-400"></i> Conectando...
             </span>
@@ -171,7 +171,7 @@
           <i class="fa-solid fa-coins"></i>
         </div>
         <h2 class="text-2xl font-bold text-white">Identificação do Estudante</h2>
-        <p class="text-sm text-zinc-400 mt-1">Preencha seus dados para iniciar os desafios de matemática financeira.</p>
+        <p class="text-sm text-zinc-400 mt-1">Preencha seus dados para iniciar as atividades de matemática financeira.</p>
       </div>
 
       <form id="student-login-form" class="space-y-4">
@@ -203,8 +203,8 @@
       <div class="bg-zinc-900 border border-zinc-800 rounded-2xl p-4 flex flex-wrap items-center justify-between gap-4">
         <div class="flex flex-wrap gap-2">
           <button id="tab-mod1" onclick="switchModule(1)" class="px-4 py-2.5 rounded-xl font-bold text-sm flex items-center gap-2 bg-yellow-400 text-black transition">
-            <i class="fa-solid fa-right-left"></i>
-            <span>Módulo 1: Casa de Câmbio (Trocas)</span>
+            <i class="fa-solid fa-coins"></i>
+            <span>Módulo 1: Juntar Valores</span>
           </button>
           <button id="tab-mod2" onclick="switchModule(2)" class="px-4 py-2.5 rounded-xl font-bold text-sm flex items-center gap-2 bg-zinc-800 text-zinc-300 hover:bg-zinc-700 transition">
             <i class="fa-solid fa-cart-shopping"></i>
@@ -225,40 +225,31 @@
       </div>
 
       <!-- =======================================================
-           MÓDULO 1: CASA DE CÂMBIO (COMPOSIÇÃO E DECOMPOSIÇÃO)
+           MÓDULO 1: JUNTAR UM DETERMINADO VALOR
            ======================================================= -->
       <div id="module-1-container" class="space-y-6">
         <!-- Card do Desafio Sorteado -->
-        <div class="bg-zinc-900 border-2 border-yellow-400/50 rounded-2xl p-5 sm:p-6 shadow-xl space-y-4">
-          <div class="flex flex-wrap items-start justify-between gap-4">
-            <div class="space-y-2 flex-1">
+        <div class="bg-zinc-900 border-2 border-yellow-400/50 rounded-2xl p-5 sm:p-6 shadow-xl">
+          <div class="flex flex-wrap items-center justify-between gap-4">
+            <div class="space-y-1 flex-1">
               <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-yellow-400/15 text-yellow-300 text-xs font-bold uppercase tracking-wider">
-                <i class="fa-solid fa-shuffle"></i> Desafio Aleatório de Troca
+                <i class="fa-solid fa-shuffle"></i> Composição de Valor
               </div>
-              <h2 id="m1-prompt-title" class="text-xl sm:text-2xl font-extrabold text-white leading-snug">
-                Carregando desafio...
+              <h2 id="m1-prompt-title" class="text-2xl sm:text-3xl font-extrabold text-white leading-snug pt-1">
+                Carregando valor...
               </h2>
-              <p id="m1-prompt-rule" class="text-sm sm:text-base text-amber-300 font-medium flex items-center gap-2">
-                <i class="fa-solid fa-circle-exclamation"></i>
-                <span>Regra: ...</span>
+              <p class="text-sm text-zinc-400">
+                Selecione cédulas e moedas abaixo até juntar exatamente a quantia solicitada.
               </p>
             </div>
-            <button onclick="generateExchangeChallenge()" class="bg-zinc-800 hover:bg-zinc-700 text-zinc-200 border border-zinc-700 px-3.5 py-2 rounded-xl text-xs font-semibold flex items-center gap-2 transition">
+            <button onclick="generateExchangeChallenge()" class="bg-zinc-800 hover:bg-zinc-700 text-zinc-200 border border-zinc-700 px-4 py-2.5 rounded-xl text-xs font-bold flex items-center gap-2 transition">
               <i class="fa-solid fa-rotate"></i>
-              <span>Novo Sorteio</span>
+              <span>Novo Valor</span>
             </button>
-          </div>
-
-          <!-- Exibição Visual das Peças que o Aluno Possui para Trocar (quando aplicável) -->
-          <div id="m1-source-box" class="hidden bg-zinc-950 border border-zinc-800 rounded-xl p-3.5">
-            <span class="block text-[11px] uppercase tracking-wider font-bold text-zinc-400 mb-2">
-              <i class="fa-solid fa-hand-holding text-yellow-400 mr-1"></i> Dinheiro que você está entregando no balcão para trocar:
-            </span>
-            <div id="m1-source-pieces" class="flex flex-wrap gap-2"></div>
           </div>
         </div>
 
-        <!-- Área Interativa: Bandeja do Aluno + Opções Permitidas para o Desafio -->
+        <!-- Área Interativa: Bandeja do Aluno + Todas as Cédulas e Moedas -->
         <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
           <!-- Bandeja de Montagem (5 colunas) -->
           <div class="lg:col-span-5 bg-zinc-900 border border-zinc-800 rounded-2xl p-5 flex flex-col justify-between">
@@ -266,7 +257,7 @@
               <div class="flex items-center justify-between border-b border-zinc-800 pb-3 mb-4">
                 <h3 class="font-bold text-white flex items-center gap-2">
                   <i class="fa-solid fa-hand-holding-dollar text-yellow-400"></i>
-                  <span>Sua Bandeja de Troca</span>
+                  <span>Dinheiro Reunido</span>
                 </h3>
                 <button onclick="clearM1Tray()" class="text-xs text-red-400 hover:text-red-300 font-semibold flex items-center gap-1">
                   <i class="fa-solid fa-trash-can"></i> Limpar
@@ -274,7 +265,7 @@
               </div>
 
               <div id="m1-tray-items" class="min-h-[190px] max-h-[300px] overflow-y-auto bg-zinc-950 border border-dashed border-zinc-700 rounded-xl p-3 flex flex-wrap content-start gap-2">
-                <p class="text-zinc-500 text-sm m-auto text-center">Clique nas moedas ou cédulas disponíveis ao lado para montar sua troca.</p>
+                <p class="text-zinc-500 text-sm m-auto text-center">Clique nas moedas ou cédulas ao lado para juntar o valor pedido.</p>
               </div>
             </div>
 
@@ -284,7 +275,7 @@
                 <span id="m1-piece-count" class="font-bold text-white">0 peças</span>
               </div>
               <div id="m1-auto-sum-row" class="flex items-center justify-between text-base">
-                <span class="text-zinc-400">Total na bandeja:</span>
+                <span class="text-zinc-400">Total reunido:</span>
                 <span id="m1-tray-total" class="font-extrabold text-xl text-yellow-400">R$ 0,00</span>
               </div>
 
@@ -292,31 +283,24 @@
 
               <button onclick="checkM1Answer()" class="w-full bg-emerald-500 hover:bg-emerald-400 text-black font-extrabold py-3.5 rounded-xl text-base shadow-lg transition flex items-center justify-center gap-2">
                 <i class="fa-solid fa-check-double"></i>
-                <span>Confirmar Troca</span>
+                <span>Conferir Valor</span>
               </button>
             </div>
           </div>
 
-          <!-- Banco Filtrado de Moedas e Cédulas Permitidas (7 colunas) -->
+          <!-- Banco Completo de Moedas e Cédulas (7 colunas) -->
           <div class="lg:col-span-7 bg-zinc-900 border border-zinc-800 rounded-2xl p-5 space-y-5">
-            <div class="flex items-center justify-between border-b border-zinc-800 pb-3">
-              <h3 class="text-xs font-bold uppercase tracking-wider text-yellow-400 flex items-center gap-2">
-                <i class="fa-solid fa-vault"></i> Opções Disponíveis no Caixa para Este Desafio
+            <div>
+              <h3 class="text-xs font-bold uppercase tracking-wider text-zinc-400 mb-3 flex items-center gap-2">
+                <i class="fa-solid fa-coins text-yellow-400"></i> Moedas (Clique para adicionar)
               </h3>
-              <span class="text-[11px] text-zinc-400">Apenas peças válidas são exibidas</span>
-            </div>
-
-            <div id="m1-coins-section">
-              <h4 class="text-xs font-bold uppercase tracking-wider text-zinc-400 mb-3 flex items-center gap-2">
-                <i class="fa-solid fa-coins text-yellow-400"></i> Moedas Disponíveis
-              </h4>
               <div id="m1-coins-palette" class="grid grid-cols-3 sm:grid-cols-6 gap-3"></div>
             </div>
 
-            <div id="m1-bills-section" class="border-t border-zinc-800 pt-4">
-              <h4 class="text-xs font-bold uppercase tracking-wider text-zinc-400 mb-3 flex items-center gap-2">
-                <i class="fa-solid fa-money-bill-wave text-emerald-400"></i> Cédulas Disponíveis
-              </h4>
+            <div class="border-t border-zinc-800 pt-4">
+              <h3 class="text-xs font-bold uppercase tracking-wider text-zinc-400 mb-3 flex items-center gap-2">
+                <i class="fa-solid fa-money-bill-wave text-emerald-400"></i> Cédulas (Clique para adicionar)
+              </h3>
               <div id="m1-bills-palette" class="grid grid-cols-2 sm:grid-cols-4 gap-3"></div>
             </div>
           </div>
@@ -409,7 +393,6 @@
             </button>
           </div>
 
-          <!-- Resumo Numérico -->
           <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
             <div class="bg-zinc-950 border border-zinc-800 p-4 rounded-xl">
               <span class="text-xs text-zinc-400 block">Valor Total da Compra</span>
@@ -425,13 +408,11 @@
             </div>
           </div>
 
-          <!-- Passo 1: Selecionar cédulas/moedas da carteira para pagar -->
           <div class="bg-zinc-950/70 border border-zinc-800 rounded-xl p-4 space-y-3">
             <h4 class="text-sm font-bold text-yellow-400">Passo 1: Clique nas peças da sua carteira que você entregará ao operador de caixa</h4>
             <div id="chk-wallet-selectable" class="flex flex-wrap gap-3"></div>
           </div>
 
-          <!-- Passo 2: Gaveta do Caixa para montar o troco -->
           <div class="bg-zinc-950/70 border border-zinc-800 rounded-xl p-4 space-y-4">
             <div class="flex flex-wrap items-center justify-between gap-2">
               <h4 class="text-sm font-bold text-emerald-400">Passo 2: Agora atue como Caixa! Selecione as cédulas e moedas do TROCO a devolver (se não houver troco, deixe vazio)</h4>
@@ -440,12 +421,10 @@
               </button>
             </div>
 
-            <!-- Bandeja do troco montado -->
             <div id="chk-change-tray" class="min-h-[84px] bg-zinc-900 border border-dashed border-zinc-700 rounded-xl p-3 flex flex-wrap gap-2 items-center">
               <span class="text-xs text-zinc-500">Nenhuma peça selecionada para o troco.</span>
             </div>
 
-            <!-- Paleta completa de moedas e cédulas do caixa -->
             <div class="space-y-3 pt-2">
               <div id="chk-drawer-coins" class="grid grid-cols-3 sm:grid-cols-6 gap-2.5"></div>
               <div id="chk-drawer-bills" class="grid grid-cols-2 sm:grid-cols-7 gap-2.5"></div>
@@ -468,7 +447,6 @@
          ========================================================= -->
     <section id="screen-teacher" class="hidden space-y-6 print-container">
 
-      <!-- Barra de Controle do Professor -->
       <div class="no-print bg-zinc-900 border border-zinc-800 rounded-2xl p-4 flex flex-wrap items-center justify-between gap-4">
         <div class="flex flex-wrap gap-2">
           <button id="ptab-reports" onclick="switchTeacherTab('reports')" class="px-4 py-2 rounded-xl text-xs sm:text-sm font-bold bg-yellow-400 text-black">
@@ -501,7 +479,7 @@
               <label class="block text-[11px] uppercase text-zinc-400 font-bold mb-1">Filtrar por Módulo</label>
               <select id="filter-module" onchange="renderReportsTable()" class="bg-zinc-950 border border-zinc-700 rounded-lg px-3 py-2 text-sm text-white">
                 <option value="ALL">Todos os Módulos</option>
-                <option value="Casa de Câmbio">Módulo 1 — Casa de Câmbio</option>
+                <option value="Juntar Valores">Módulo 1 — Juntar Valores</option>
                 <option value="Mercadinho & Troco">Módulo 2 — Mercadinho & Troco</option>
               </select>
             </div>
@@ -522,7 +500,6 @@
           </div>
         </div>
 
-        <!-- Tabela de Resultados -->
         <div class="bg-zinc-900 border border-zinc-800 rounded-2xl p-4 overflow-x-auto print-container">
           <table class="w-full text-left border-collapse text-xs sm:text-sm">
             <thead>
@@ -531,7 +508,7 @@
                 <th class="p-3">Estudante</th>
                 <th class="p-3">Turma</th>
                 <th class="p-3">Módulo</th>
-                <th class="p-3">Desafio Sorteado & Resposta</th>
+                <th class="p-3">Valor Solicitado & Resposta</th>
                 <th class="p-3 text-center">Tentativas</th>
                 <th class="p-3 text-center">Status</th>
               </tr>
@@ -565,9 +542,9 @@
           <div>
             <label class="block text-xs font-bold uppercase text-zinc-400 mb-1">Nível de Dificuldade do Sorteio</label>
             <select id="cfg-difficulty" class="w-full bg-zinc-950 border border-zinc-700 rounded-xl px-3 py-2.5 text-sm text-white">
-              <option value="1">Nível 1 — Básico (Valores inteiros: R$ 1 a R$ 50)</option>
+              <option value="1">Nível 1 — Básico (Valores inteiros: R$ 1 a R$ 150)</option>
               <option value="2">Nível 2 — Intermediário (Reais + centavos de R$ 0,05, R$ 0,10, R$ 0,25, R$ 0,50)</option>
-              <option value="3">Nível 3 — Completo (Todas as cédulas até R$ 100 e moedas incluindo R$ 0,01)</option>
+              <option value="3">Nível 3 — Completo (Centavos exatos incluindo R$ 0,01)</option>
             </select>
           </div>
 
@@ -723,7 +700,6 @@
       { id: "p9", name: "Mochila Escolar", icon: "fa-briefcase" }
     ];
 
-    // Estado Global
     let appSettings = {
       difficulty: 2,
       showSum: true,
@@ -786,8 +762,7 @@
       }
 
       applySettingsToUI();
-      renderM2DrawerPalette();
-      if (m1Challenge) renderM1Palette();
+      renderAllPalettes();
     }
 
     function applySettingsToUI() {
@@ -813,11 +788,10 @@
     // =========================================================================
     // 4. RENDERIZAÇÃO VISUAL DE CÉDULAS E MOEDAS (IMAGEM REAL OU FALLBACK)
     // =========================================================================
-    function createMoneyButtonHTML(item, onClickAttr, extraBadge = "") {
+    function createMoneyButtonHTML(item, onClickAttr) {
       if (item.imageUrl) {
         return `
           <button type="button" onclick="${onClickAttr}" class="money-item bg-zinc-950 border border-zinc-700 rounded-xl p-2 flex flex-col items-center justify-between relative group">
-            ${extraBadge}
             <img src="${item.imageUrl}" alt="${item.label}" class="${item.type === 'coin' ? 'w-14 h-14 object-contain rounded-full' : 'w-full h-16 object-contain rounded'}" />
             <span class="text-[11px] font-bold text-zinc-200 mt-1.5 group-hover:text-yellow-400">${item.short}</span>
             <span class="text-[9px] text-zinc-500 leading-none">${item.type === 'coin' ? 'Moeda' : 'Cédula'}</span>
@@ -828,7 +802,6 @@
       if (item.type === "coin") {
         return `
           <button type="button" onclick="${onClickAttr}" class="money-item bg-zinc-950 border border-zinc-800 rounded-xl p-2.5 flex flex-col items-center justify-center relative">
-            ${extraBadge}
             <div class="coin-circle w-14 h-14 ${item.color} font-extrabold text-xs">
               <span>${item.short.replace("R$ ", "")}</span>
             </div>
@@ -838,7 +811,6 @@
       } else {
         return `
           <button type="button" onclick="${onClickAttr}" class="money-item bg-zinc-950 border border-zinc-800 rounded-xl p-2 flex flex-col items-center justify-center relative">
-            ${extraBadge}
             <div class="bill-rect w-full h-14 ${item.color} font-extrabold text-sm px-2">
               <span class="text-[9px] uppercase tracking-widest opacity-80">República</span>
               <span>${item.short}</span>
@@ -849,41 +821,15 @@
       }
     }
 
-    // Renderiza a paleta do Módulo 1 FILTRADA apenas pelas peças permitidas no desafio atual
-    function renderM1Palette() {
-      const allowedSet = new Set(m1Challenge ? m1Challenge.allowedIds : DENOMINATIONS.map(d => d.id));
-      const coins = DENOMINATIONS.filter(d => d.type === "coin" && allowedSet.has(d.id));
-      const bills = DENOMINATIONS.filter(d => d.type === "bill" && allowedSet.has(d.id));
-
-      const coinsSec = document.getElementById("m1-coins-section");
-      const billsSec = document.getElementById("m1-bills-section");
-
-      if (coins.length === 0) {
-        coinsSec.classList.add("hidden");
-      } else {
-        coinsSec.classList.remove("hidden");
-        document.getElementById("m1-coins-palette").innerHTML = coins
-          .map(c => createMoneyButtonHTML(c, `addToM1Tray('${c.id}')`)).join("");
-      }
-
-      if (bills.length === 0) {
-        billsSec.classList.add("hidden");
-      } else {
-        billsSec.classList.remove("hidden");
-        if (coins.length === 0) {
-          billsSec.classList.remove("border-t", "border-zinc-800", "pt-4");
-        } else {
-          billsSec.classList.add("border-t", "border-zinc-800", "pt-4");
-        }
-        document.getElementById("m1-bills-palette").innerHTML = bills
-          .map(b => createMoneyButtonHTML(b, `addToM1Tray('${b.id}')`)).join("");
-      }
-    }
-
-    // Renderiza a gaveta completa do caixa no Módulo 2
-    function renderM2DrawerPalette() {
+    // Todas as moedas e cédulas sempre disponíveis
+    function renderAllPalettes() {
       const coins = DENOMINATIONS.filter(d => d.type === "coin");
       const bills = DENOMINATIONS.filter(d => d.type === "bill");
+
+      document.getElementById("m1-coins-palette").innerHTML = coins
+        .map(c => createMoneyButtonHTML(c, `addToM1Tray('${c.id}')`)).join("");
+      document.getElementById("m1-bills-palette").innerHTML = bills
+        .map(b => createMoneyButtonHTML(b, `addToM1Tray('${b.id}')`)).join("");
 
       document.getElementById("chk-drawer-coins").innerHTML = coins
         .map(c => createMoneyButtonHTML(c, `addToM2Change('${c.id}')`)).join("");
@@ -892,7 +838,7 @@
     }
 
     // =========================================================================
-    // 5. GERADOR ALEATÓRIO INTELIGENTE — MÓDULO 1 (CASA DE CÂMBIO)
+    // 5. GERADOR ALEATÓRIO — MÓDULO 1 (APENAS JUNTAR UM DETERMINADO VALOR)
     // =========================================================================
     window.generateExchangeChallenge = function() {
       m1Tray = [];
@@ -901,173 +847,27 @@
       renderM1Tray();
 
       const diff = Number(appSettings.difficulty);
-      const templates = [];
+      let targetCents = 0;
 
       if (diff === 1) {
-        templates.push(
-          {
-            targetCents: 5000,
-            title: "Troque 1 cédula de R$ 50,00 por outras cédulas equivalentes.",
-            rule: "Obrigatório usar exatamente 1 cédula de R$ 10,00 na sua resposta.",
-            sourceItems: [{ id: "c_5000", qty: 1 }],
-            allowedIds: ["m_100", "c_100", "c_200", "c_500", "c_1000", "c_2000"],
-            validate: (tray) => {
-              const c10 = tray.filter(i => i.id === "c_1000").length;
-              if (c10 !== 1) return "A regra pede exatamente 1 cédula de R$ 10,00.";
-              return null;
-            }
-          },
-          {
-            targetCents: 2000,
-            title: "Troque 1 cédula de R$ 20,00 sem usar cédulas de R$ 10,00.",
-            rule: "Use apenas as cédulas e moedas menores disponíveis no caixa.",
-            sourceItems: [{ id: "c_2000", qty: 1 }],
-            allowedIds: ["m_100", "c_100", "c_200", "c_500"],
-            validate: () => null
-          },
-          {
-            targetCents: 1000,
-            title: "Forme R$ 10,00 usando apenas cédulas de R$ 2,00 e R$ 1,00 (ou moeda de R$ 1,00).",
-            rule: "Use exatamente 6 peças no total.",
-            sourceItems: [{ id: "c_1000", qty: 1 }],
-            allowedIds: ["m_100", "c_100", "c_200"],
-            validate: (tray) => {
-              if (tray.length !== 6) return `Você usou ${tray.length} peças, mas a regra exige exatamente 6 peças.`;
-              return null;
-            }
-          },
-          {
-            targetCents: 10000,
-            title: "Troque 1 cédula de R$ 100,00 usando pelo menos 3 tipos diferentes de cédulas.",
-            rule: "Combine no mínimo 3 valores diferentes entre as cédulas disponíveis.",
-            sourceItems: [{ id: "c_10000", qty: 1 }],
-            allowedIds: ["c_500", "c_1000", "c_2000", "c_5000"],
-            validate: (tray) => {
-              const uniqueTypes = new Set(tray.map(i => i.cents)).size;
-              if (uniqueTypes < 3) return "Use pelo menos 3 valores diferentes de cédulas.";
-              return null;
-            }
-          }
-        );
+        // Nível 1: Valores inteiros variados (entre R$ 2,00 e R$ 150,00)
+        const reais = Math.floor(Math.random() * 149) + 2;
+        targetCents = reais * 100;
       } else if (diff === 2) {
-        const randomTargets = [150, 275, 340, 485, 630];
-        const chosen = randomTargets[Math.floor(Math.random() * randomTargets.length)];
-        templates.push(
-          {
-            targetCents: chosen,
-            title: `Forme exatamente ${formatBRL(chosen)} sem usar moedas de R$ 0,50.`,
-            rule: "Combine as moedas e cédulas disponíveis no caixa.",
-            sourceItems: [],
-            allowedIds: ["m_5", "m_10", "m_25", "m_100", "c_100", "c_200", "c_500"],
-            validate: () => null
-          },
-          {
-            targetCents: 5000,
-            title: "Troque 1 cédula de R$ 50,00 usando 1 cédula de R$ 20,00, 2 cédulas de R$ 10,00 e o restante em moedas.",
-            rule: "Complete o valor de R$ 50,00 respeitando as cédulas indicadas.",
-            sourceItems: [{ id: "c_5000", qty: 1 }],
-            allowedIds: ["m_25", "m_50", "m_100", "c_1000", "c_2000"],
-            validate: (tray) => {
-              const c20 = tray.filter(i => i.id === "c_2000").length;
-              const c10 = tray.filter(i => i.id === "c_1000").length;
-              if (c20 !== 1 || c10 !== 2) {
-                return "Use exatamente 1 cédula de R$ 20,00, 2 de R$ 10,00 e complete os R$ 10,00 restantes apenas com moedas.";
-              }
-              return null;
-            }
-          },
-          {
-            targetCents: 200,
-            title: "Você possui 4 moedas de R$ 0,25 e 10 moedas de R$ 0,10. Troque tudo pela MENOR quantidade possível de peças.",
-            rule: "Agrupe suas moedas e selecione apenas a representação mais econômica.",
-            sourceItems: [{ id: "m_25", qty: 4 }, { id: "m_10", qty: 10 }],
-            allowedIds: ["m_100", "c_100", "c_200"],
-            validate: (tray) => {
-              if (tray.length > 1) return `É possível trocar esse montante por apenas 1 única cédula de R$ 2,00.`;
-              return null;
-            }
-          },
-          {
-            targetCents: 500,
-            title: "Você possui 6 moedas de R$ 0,50 e 8 moedas de R$ 0,25. Troque tudo pela MENOR quantidade possível de peças.",
-            rule: "Agrupe suas moedas e escolha a cédula equivalente.",
-            sourceItems: [{ id: "m_50", qty: 6 }, { id: "m_25", qty: 8 }],
-            allowedIds: ["m_100", "c_200", "c_500"],
-            validate: (tray) => {
-              if (tray.length > 1) return `Você pode trocar tudo por apenas 1 cédula de R$ 5,00.`;
-              return null;
-            }
-          }
-        );
+        // Nível 2: Reais e centavos múltiplos de 5 centavos (entre R$ 1,05 e R$ 85,95)
+        const steps = Math.floor(Math.random() * 1700) + 21;
+        targetCents = steps * 5;
       } else {
-        const randomCents = [137, 268, 493, 742, 1189];
-        const chosen = randomCents[Math.floor(Math.random() * randomCents.length)];
-        templates.push(
-          {
-            targetCents: chosen,
-            title: `Monte exatamente ${formatBRL(chosen)} usando as moedas de centavos (incluindo R$ 0,01) e cédulas disponíveis.`,
-            rule: "Use a menor quantidade possível de moedas para os centavos.",
-            sourceItems: [],
-            allowedIds: ["m_1", "m_5", "m_10", "m_25", "m_50", "m_100", "c_100", "c_200", "c_500", "c_1000"],
-            validate: (tray) => {
-              const coinsCount = tray.filter(i => i.type === "coin").length;
-              if (coinsCount > 9) return "Agrupe os centavos usando moedas maiores (R$ 0,50, R$ 0,25, R$ 0,10, R$ 0,05) em vez de muitas moedas pequenas.";
-              return null;
-            }
-          },
-          {
-            targetCents: 100,
-            title: "Troque 1 cédula de R$ 1,00 por moedas de centavos (sem usar moedas de R$ 0,50).",
-            rule: "Use pelo menos 2 moedas de R$ 0,05 e 5 moedas de R$ 0,01 no conjunto.",
-            sourceItems: [{ id: "c_100", qty: 1 }],
-            allowedIds: ["m_1", "m_5", "m_10", "m_25"],
-            validate: (tray) => {
-              const m5 = tray.filter(i => i.id === "m_5").length;
-              const m1 = tray.filter(i => i.id === "m_1").length;
-              if (m5 < 2 || m1 < 5) return "Inclua pelo menos 2 moedas de R$ 0,05 e 5 moedas de R$ 0,01.";
-              return null;
-            }
-          },
-          {
-            targetCents: 5000,
-            title: "Troque 1 cédula de R$ 50,00 combinando cédulas de R$ 20,00, R$ 10,00, R$ 5,00, R$ 2,00 e R$ 1,00.",
-            rule: "Use pelo menos uma cédula de cada um desses 5 valores disponíveis.",
-            sourceItems: [{ id: "c_5000", qty: 1 }],
-            allowedIds: ["c_100", "c_200", "c_500", "c_1000", "c_2000"],
-            validate: (tray) => {
-              const req = ["c_2000", "c_1000", "c_500", "c_200", "c_100"];
-              const missing = req.filter(id => !tray.some(t => t.id === id));
-              if (missing.length > 0) return "Faltou incluir pelo menos uma cédula de cada valor exigido (R$ 20, R$ 10, R$ 5, R$ 2 e R$ 1).";
-              return null;
-            }
-          }
-        );
+        // Nível 3: Qualquer valor em centavos incluindo moedas de 1 centavo (entre R$ 0,15 e R$ 99,99)
+        targetCents = Math.floor(Math.random() * 9985) + 15;
       }
 
-      m1Challenge = templates[Math.floor(Math.random() * templates.length)];
+      m1Challenge = {
+        targetCents,
+        title: `Junte o valor de ${formatBRL(targetCents)}`
+      };
+
       document.getElementById("m1-prompt-title").textContent = m1Challenge.title;
-      document.getElementById("m1-prompt-rule").innerHTML = `<i class="fa-solid fa-circle-exclamation"></i> <span>${m1Challenge.rule}</span>`;
-
-      // Renderiza as peças de origem (se o desafio informar o que o aluno possui)
-      const sourceBox = document.getElementById("m1-source-box");
-      const sourcePieces = document.getElementById("m1-source-pieces");
-      if (m1Challenge.sourceItems && m1Challenge.sourceItems.length > 0) {
-        sourceBox.classList.remove("hidden");
-        sourcePieces.innerHTML = m1Challenge.sourceItems.map(s => {
-          const item = DENOMINATIONS.find(d => d.id === s.id);
-          return `
-            <span class="px-3 py-1.5 rounded-lg border text-xs font-extrabold ${item.color} flex items-center gap-1.5">
-              <span>${s.qty}x</span>
-              <span>${item.label}</span>
-            </span>
-          `;
-        }).join("");
-      } else {
-        sourceBox.classList.add("hidden");
-      }
-
-      // Atualiza a paleta para mostrar SOMENTE as peças permitidas neste desafio
-      renderM1Palette();
     };
 
     window.addToM1Tray = function(denomId) {
@@ -1090,13 +890,13 @@
     function renderM1Tray() {
       const container = document.getElementById("m1-tray-items");
       if (m1Tray.length === 0) {
-        container.innerHTML = `<p class="text-zinc-500 text-sm m-auto text-center">Clique nas moedas ou cédulas disponíveis ao lado para montar sua troca.</p>`;
+        container.innerHTML = `<p class="text-zinc-500 text-sm m-auto text-center">Clique nas moedas ou cédulas ao lado para juntar o valor pedido.</p>`;
       } else {
         container.innerHTML = m1Tray.map((item, idx) => `
           <button type="button" onclick="removeFromM1Tray(${idx})" title="Clique para remover"
                   class="px-2.5 py-1.5 rounded-lg border text-xs font-bold flex items-center gap-1.5 ${item.color} hover:opacity-80 transition">
             <span>${item.short}</span>
-            <span class="text-[10px] opacity-80">(${item.type === 'coin' ? 'M' : 'C'})</span>
+            <span class="text-[10px] opacity-80">(${item.type === 'coin' ? 'Moeda' : 'Cédula'})</span>
             <i class="fa-solid fa-xmark text-[10px] ml-1"></i>
           </button>
         `).join("");
@@ -1117,28 +917,24 @@
 
       if (totalCents !== m1Challenge.targetCents) {
         fb.classList.add("bg-red-500/20", "text-red-300", "border-red-500/40");
-        const diffMsg = totalCents < m1Challenge.targetCents ? "Ainda falta dinheiro para atingir o valor alvo." : "O valor na bandeja ultrapassou o valor alvo.";
-        fb.innerHTML = `<i class="fa-solid fa-circle-xmark mr-1"></i> Valor incorreto (${formatBRL(totalCents)}). ${diffMsg}`;
-        return;
-      }
-
-      const ruleError = m1Challenge.validate(m1Tray);
-      if (ruleError) {
-        fb.classList.add("bg-red-500/20", "text-red-300", "border-red-500/40");
-        fb.innerHTML = `<i class="fa-solid fa-triangle-exclamation mr-1"></i> O valor soma ${formatBRL(totalCents)}, mas atenção à regra: ${ruleError}`;
+        const diffCents = Math.abs(m1Challenge.targetCents - totalCents);
+        const diffMsg = totalCents < m1Challenge.targetCents
+          ? `Faltam ${formatBRL(diffCents)} para completar ${formatBRL(m1Challenge.targetCents)}.`
+          : `Passou ${formatBRL(diffCents)} do valor pedido de ${formatBRL(m1Challenge.targetCents)}.`;
+        fb.innerHTML = `<i class="fa-solid fa-circle-xmark mr-1"></i> Você reuniu ${formatBRL(totalCents)}. ${diffMsg}`;
         return;
       }
 
       fb.classList.add("bg-emerald-500/20", "text-emerald-300", "border-emerald-500/40");
-      fb.innerHTML = `<i class="fa-solid fa-circle-check mr-1"></i> Excelente! Troca realizada com sucesso (${formatBRL(totalCents)}). Clique em "Novo Sorteio" para o próximo desafio.`;
+      fb.innerHTML = `<i class="fa-solid fa-circle-check mr-1"></i> Muito bem! Você juntou exatamente ${formatBRL(totalCents)}. Clique em "Novo Valor" para continuar.`;
 
       sessionScore++;
       document.getElementById("session-score").textContent = sessionScore;
 
       const summaryPieces = m1Tray.map(i => i.short).join(" + ");
       await saveReportRecord({
-        module: "Casa de Câmbio",
-        detail: `${m1Challenge.title} | Resposta: [${summaryPieces}]`,
+        module: "Juntar Valores",
+        detail: `${m1Challenge.title} | Peças usadas: [${summaryPieces}]`,
         attempts: m1Attempts,
         status: "Concluído"
       });
@@ -1703,8 +1499,7 @@
       }
 
       renderMediaManager();
-      renderM2DrawerPalette();
-      if (m1Challenge) renderM1Palette();
+      renderAllPalettes();
     };
 
     window.saveTeacherSettings = async function() {
@@ -1774,8 +1569,7 @@
           }
           applySettingsToUI();
           renderMediaManager();
-          renderM2DrawerPalette();
-          if (m1Challenge) renderM1Palette();
+          renderAllPalettes();
           renderReportsTable();
           alert("Backup restaurado com sucesso!");
         } catch (err) {
@@ -1788,18 +1582,21 @@
     window.clearAllReports = async function() {
       if (!confirm("Tem certeza que deseja apagar todo o histórico de relatórios?")) return;
       localStorage.removeItem("fin_lab_reports");
-      if (firebaseReady) {
+      if (firebaseReady && db) {
         try {
           const snap = await getDocs(collection(db, "fin_educacao_relatorios"));
-          for (const d of snap.docs) {
-            await deleteDoc(doc(db, "fin_educacao_relatorios", d.id));
-          }
+          const deletions = snap.docs.map(d => deleteDoc(doc(db, "fin_educacao_relatorios", d.id)));
+          await Promise.all(deletions);
         } catch (e) {
           console.error("Erro ao limpar Firestore:", e);
+          alert("Houve um erro ao apagar os registros no Firebase. Verifique as regras do Firestore.");
+          return;
         }
       }
       allReports = [];
+      document.getElementById("filter-class").innerHTML = `<option value="ALL">Todas as Turmas</option>`;
       renderReportsTable();
+      alert("Histórico de relatórios apagado com sucesso!");
     };
 
     loadSystemData();
