@@ -1,0 +1,1768 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Laboratório de Educação Financeira — Sistema Monetário Brasileiro</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
+  <style>
+    :root {
+      --bg-dark: #0a0a0c;
+      --card-dark: #141418;
+      --border-dark: #27272a;
+      --accent-yellow: #facc15;
+    }
+
+    body {
+      background-color: var(--bg-dark);
+      color: #f4f4f5;
+      font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+    }
+
+    /* Estilização dos Cards de Dinheiro (Fallback e Imagens Reais) */
+    .money-item {
+      transition: transform 0.15s ease, box-shadow 0.15s ease, border-color 0.15s ease;
+      user-select: none;
+    }
+    .money-item:hover:not(:disabled) {
+      transform: translateY(-3px);
+      box-shadow: 0 8px 20px rgba(250, 204, 21, 0.2);
+      border-color: #facc15;
+    }
+    .money-item:active:not(:disabled) {
+      transform: scale(0.97);
+    }
+
+    .coin-circle {
+      border-radius: 9999px;
+      aspect-ratio: 1 / 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      box-shadow: inset 0 0 0 3px rgba(255,255,255,0.25), 0 4px 10px rgba(0,0,0,0.6);
+    }
+
+    .bill-rect {
+      border-radius: 0.5rem;
+      aspect-ratio: 2.1 / 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      box-shadow: inset 0 0 0 2px rgba(255,255,255,0.2), 0 4px 10px rgba(0,0,0,0.6);
+      position: relative;
+      overflow: hidden;
+    }
+
+    /* Configuração de Impressão A4 Nativa */
+    @media print {
+      @page {
+        size: A4 portrait;
+        margin: 12mm;
+      }
+      body {
+        background: #ffffff !important;
+        color: #000000 !important;
+        font-size: 11pt;
+      }
+      .no-print {
+        display: none !important;
+      }
+      .print-only {
+        display: block !important;
+      }
+      .print-container {
+        background: #ffffff !important;
+        color: #000000 !important;
+        border: none !important;
+        box-shadow: none !important;
+        padding: 0 !important;
+        margin: 0 !important;
+        width: 100% !important;
+      }
+      table {
+        width: 100% !important;
+        border-collapse: collapse !important;
+        color: #000000 !important;
+      }
+      th, td {
+        border: 1px solid #333333 !important;
+        padding: 6px 8px !important;
+        color: #000000 !important;
+        background: #ffffff !important;
+      }
+      th {
+        background: #e5e7eb !important;
+        font-weight: bold !important;
+      }
+      .print-footer {
+        position: fixed;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        text-align: center;
+        font-size: 9pt;
+        color: #333333 !important;
+        border-top: 1px solid #999999;
+        padding-top: 4px;
+        background: #ffffff !important;
+      }
+    }
+  </style>
+</head>
+<body class="min-h-screen flex flex-col justify-between">
+
+  <!-- =========================================================
+       CABEÇALHO EXCLUSIVO PARA IMPRESSÃO A4
+       ========================================================= -->
+  <div class="print-only hidden mb-4">
+    <img src="https://raw.githubusercontent.com/rwpo/rwpo.github.io/main/Cabecalho_CAS.png"
+         alt="Cabeçalho Institucional"
+         onerror="this.style.display='none'"
+         class="w-full max-h-28 object-contain mx-auto mb-2" />
+    <div class="text-center border-b-2 border-black pb-2">
+      <h1 class="text-lg font-bold uppercase">Relatório de Desempenho — Matemática Financeira (Sistema Monetário)</h1>
+      <p id="print-meta-info" class="text-xs text-gray-700 mt-1"></p>
+    </div>
+  </div>
+
+  <!-- =========================================================
+       BARRA SUPERIOR DE NAVEGAÇÃO (NO-PRINT)
+       ========================================================= -->
+  <header class="no-print bg-zinc-950 border-b border-zinc-800 sticky top-0 z-40">
+    <div class="max-w-7xl mx-auto px-4 py-3 flex flex-wrap items-center justify-between gap-3">
+      <div class="flex items-center gap-3">
+        <div class="w-10 h-10 rounded-lg bg-yellow-400 text-black flex items-center justify-center font-extrabold text-xl shadow">
+          R$
+        </div>
+        <div>
+          <h1 class="font-bold text-base sm:text-lg text-white leading-tight">Laboratório de Educação Financeira</h1>
+          <p class="text-xs text-zinc-400 flex items-center gap-2">
+            <span>Trocas, Orçamento e Troco</span>
+            <span id="firebase-status-badge" class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-semibold bg-zinc-800 text-zinc-300">
+              <i class="fa-solid fa-circle text-[7px] text-amber-400"></i> Conectando...
+            </span>
+          </p>
+        </div>
+      </div>
+
+      <div class="flex items-center gap-2 flex-wrap">
+        <div id="student-pill" class="hidden items-center gap-2 bg-zinc-900 border border-zinc-700 px-3 py-1.5 rounded-lg text-xs">
+          <i class="fa-solid fa-user-graduate text-yellow-400"></i>
+          <span id="header-student-name" class="font-semibold text-white"></span>
+          <span id="header-student-class" class="text-zinc-400"></span>
+          <button onclick="logoutStudent()" title="Trocar Aluno" class="ml-1 text-zinc-400 hover:text-red-400">
+            <i class="fa-solid fa-right-from-bracket"></i>
+          </button>
+        </div>
+
+        <button onclick="openTeacherModal()" class="bg-zinc-900 hover:bg-zinc-800 text-yellow-400 border border-yellow-500/40 px-3 py-2 rounded-lg text-xs sm:text-sm font-semibold flex items-center gap-2 transition">
+          <i class="fa-solid fa-chalkboard-user"></i>
+          <span>Área do Professor</span>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- =========================================================
+       CONTEÚDO PRINCIPAL
+       ========================================================= -->
+  <main class="flex-grow max-w-7xl w-full mx-auto px-4 py-6">
+
+    <!-- TELA 1: IDENTIFICAÇÃO DO ALUNO -->
+    <section id="screen-login" class="no-print max-w-lg mx-auto mt-6 bg-zinc-900 border border-zinc-800 rounded-2xl p-6 sm:p-8 shadow-2xl">
+      <div class="text-center mb-6">
+        <div class="inline-flex items-center justify-center w-14 h-14 rounded-full bg-yellow-400/10 border border-yellow-400/30 text-yellow-400 text-2xl mb-3">
+          <i class="fa-solid fa-coins"></i>
+        </div>
+        <h2 class="text-2xl font-bold text-white">Identificação do Estudante</h2>
+        <p class="text-sm text-zinc-400 mt-1">Preencha seus dados para iniciar os desafios de matemática financeira.</p>
+      </div>
+
+      <form id="student-login-form" class="space-y-4">
+        <div>
+          <label class="block text-xs font-semibold uppercase tracking-wider text-zinc-400 mb-1">Nome Completo do Aluno</label>
+          <input type="text" id="input-student-name" required placeholder="Ex.: Ana Beatriz Silva"
+                 class="w-full bg-zinc-950 border border-zinc-700 focus:border-yellow-400 rounded-xl px-4 py-3 text-white outline-none transition" />
+        </div>
+        <div>
+          <label class="block text-xs font-semibold uppercase tracking-wider text-zinc-400 mb-1">Turma / Ano</label>
+          <input type="text" id="input-student-class" required placeholder="Ex.: 6º Ano A"
+                 class="w-full bg-zinc-950 border border-zinc-700 focus:border-yellow-400 rounded-xl px-4 py-3 text-white outline-none transition" />
+        </div>
+        <div class="bg-zinc-950/70 border border-zinc-800 rounded-xl p-3 text-xs text-zinc-400 flex items-center justify-between">
+          <span>Nível Ativo da Turma:</span>
+          <span id="login-active-level" class="font-bold text-yellow-400">Nível 2 — Intermediário</span>
+        </div>
+        <button type="submit" class="w-full bg-yellow-400 hover:bg-yellow-300 text-black font-bold py-3.5 rounded-xl text-base shadow-lg transition flex items-center justify-center gap-2">
+          <span>Entrar no Laboratório</span>
+          <i class="fa-solid fa-arrow-right"></i>
+        </button>
+      </form>
+    </section>
+
+    <!-- TELA 2: AMBIENTE DO ALUNO (MÓDULOS) -->
+    <section id="screen-student" class="no-print hidden space-y-6">
+
+      <!-- Barra de Seleção de Módulo e Indicadores -->
+      <div class="bg-zinc-900 border border-zinc-800 rounded-2xl p-4 flex flex-wrap items-center justify-between gap-4">
+        <div class="flex flex-wrap gap-2">
+          <button id="tab-mod1" onclick="switchModule(1)" class="px-4 py-2.5 rounded-xl font-bold text-sm flex items-center gap-2 bg-yellow-400 text-black transition">
+            <i class="fa-solid fa-right-left"></i>
+            <span>Módulo 1: Casa de Câmbio (Trocas)</span>
+          </button>
+          <button id="tab-mod2" onclick="switchModule(2)" class="px-4 py-2.5 rounded-xl font-bold text-sm flex items-center gap-2 bg-zinc-800 text-zinc-300 hover:bg-zinc-700 transition">
+            <i class="fa-solid fa-cart-shopping"></i>
+            <span>Módulo 2: Mercadinho & Troco</span>
+          </button>
+        </div>
+
+        <div class="flex items-center gap-4 text-xs sm:text-sm">
+          <div class="bg-zinc-950 border border-zinc-800 px-3 py-1.5 rounded-lg">
+            <span class="text-zinc-400">Nível:</span>
+            <span id="student-level-badge" class="font-bold text-yellow-400 ml-1">Nível 2</span>
+          </div>
+          <div class="bg-zinc-950 border border-zinc-800 px-3 py-1.5 rounded-lg">
+            <span class="text-zinc-400">Acertos na Sessão:</span>
+            <span id="session-score" class="font-bold text-emerald-400 ml-1">0</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- =======================================================
+           MÓDULO 1: CASA DE CÂMBIO (COMPOSIÇÃO E DECOMPOSIÇÃO)
+           ======================================================= -->
+      <div id="module-1-container" class="space-y-6">
+        <!-- Card do Desafio Sorteado -->
+        <div class="bg-zinc-900 border-2 border-yellow-400/50 rounded-2xl p-5 sm:p-6 shadow-xl">
+          <div class="flex flex-wrap items-start justify-between gap-4">
+            <div class="space-y-2 flex-1">
+              <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-yellow-400/15 text-yellow-300 text-xs font-bold uppercase tracking-wider">
+                <i class="fa-solid fa-shuffle"></i> Desafio Aleatório de Troca
+              </div>
+              <h2 id="m1-prompt-title" class="text-xl sm:text-2xl font-extrabold text-white leading-snug">
+                Carregando desafio...
+              </h2>
+              <p id="m1-prompt-rule" class="text-sm sm:text-base text-amber-300 font-medium flex items-center gap-2">
+                <i class="fa-solid fa-circle-exclamation"></i>
+                <span>Regra: ...</span>
+              </p>
+            </div>
+            <button onclick="generateExchangeChallenge()" class="bg-zinc-800 hover:bg-zinc-700 text-zinc-200 border border-zinc-700 px-3.5 py-2 rounded-xl text-xs font-semibold flex items-center gap-2 transition">
+              <i class="fa-solid fa-rotate"></i>
+              <span>Novo Sorteio</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- Área Interativa: Bandeja do Aluno + Gaveta de Cédulas e Moedas -->
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+          <!-- Bandeja de Montagem (5 colunas) -->
+          <div class="lg:col-span-5 bg-zinc-900 border border-zinc-800 rounded-2xl p-5 flex flex-col justify-between">
+            <div>
+              <div class="flex items-center justify-between border-b border-zinc-800 pb-3 mb-4">
+                <h3 class="font-bold text-white flex items-center gap-2">
+                  <i class="fa-solid fa-hand-holding-dollar text-yellow-400"></i>
+                  <span>Sua Bandeja de Troca</span>
+                </h3>
+                <button onclick="clearM1Tray()" class="text-xs text-red-400 hover:text-red-300 font-semibold flex items-center gap-1">
+                  <i class="fa-solid fa-trash-can"></i> Limpar
+                </button>
+              </div>
+
+              <div id="m1-tray-items" class="min-h-[190px] max-h-[300px] overflow-y-auto bg-zinc-950 border border-dashed border-zinc-700 rounded-xl p-3 flex flex-wrap content-start gap-2">
+                <p class="text-zinc-500 text-sm m-auto text-center">Clique nas moedas ou cédulas ao lado para montar o valor solicitado.</p>
+              </div>
+            </div>
+
+            <div class="mt-4 pt-4 border-t border-zinc-800 space-y-3">
+              <div class="flex items-center justify-between text-sm">
+                <span class="text-zinc-400">Quantidade de peças:</span>
+                <span id="m1-piece-count" class="font-bold text-white">0 peças</span>
+              </div>
+              <div id="m1-auto-sum-row" class="flex items-center justify-between text-base">
+                <span class="text-zinc-400">Total na bandeja:</span>
+                <span id="m1-tray-total" class="font-extrabold text-xl text-yellow-400">R$ 0,00</span>
+              </div>
+
+              <div id="m1-feedback" class="hidden p-3 rounded-xl text-sm font-semibold"></div>
+
+              <button onclick="checkM1Answer()" class="w-full bg-emerald-500 hover:bg-emerald-400 text-black font-extrabold py-3.5 rounded-xl text-base shadow-lg transition flex items-center justify-center gap-2">
+                <i class="fa-solid fa-check-double"></i>
+                <span>Confirmar Troca</span>
+              </button>
+            </div>
+          </div>
+
+          <!-- Banco de Moedas e Cédulas (7 colunas) -->
+          <div class="lg:col-span-7 bg-zinc-900 border border-zinc-800 rounded-2xl p-5 space-y-5">
+            <div>
+              <h3 class="text-xs font-bold uppercase tracking-wider text-zinc-400 mb-3 flex items-center gap-2">
+                <i class="fa-solid fa-coins text-yellow-400"></i> Moedas Disponíveis (Clique para adicionar)
+              </h3>
+              <div id="m1-coins-palette" class="grid grid-cols-3 sm:grid-cols-6 gap-3"></div>
+            </div>
+
+            <div class="border-t border-zinc-800 pt-4">
+              <h3 class="text-xs font-bold uppercase tracking-wider text-zinc-400 mb-3 flex items-center gap-2">
+                <i class="fa-solid fa-money-bill-wave text-emerald-400"></i> Cédulas Disponíveis (Clique para adicionar)
+              </h3>
+              <div id="m1-bills-palette" class="grid grid-cols-2 sm:grid-cols-4 gap-3"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- =======================================================
+           MÓDULO 2: MERCADINHO & CAIXA REGISTRADORA (ORÇAMENTO + TROCO)
+           ======================================================= -->
+      <div id="module-2-container" class="hidden space-y-6">
+
+        <!-- Cabeçalho da Missão de Compra -->
+        <div class="bg-zinc-900 border-2 border-emerald-500/40 rounded-2xl p-5 flex flex-wrap items-center justify-between gap-4">
+          <div class="space-y-1">
+            <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-500/15 text-emerald-300 text-xs font-bold uppercase tracking-wider">
+              <i class="fa-solid fa-store"></i> Simulação de Compra com Orçamento Fixo
+            </div>
+            <h2 id="m2-mission-title" class="text-lg sm:text-xl font-extrabold text-white">
+              Você entrou na loja com uma carteira fechada. Escolha os itens solicitados, pague e calcule o troco!
+            </h2>
+            <p id="m2-mission-goal" class="text-sm text-amber-300 font-medium"></p>
+          </div>
+          <button onclick="generateMarketScenario()" class="bg-zinc-800 hover:bg-zinc-700 text-zinc-200 border border-zinc-700 px-3.5 py-2 rounded-xl text-xs font-semibold flex items-center gap-2 transition">
+            <i class="fa-solid fa-rotate"></i>
+            <span>Nova Compra</span>
+          </button>
+        </div>
+
+        <!-- ETAPA A: VITRINE + CARTEIRA DO ALUNO -->
+        <div id="m2-step-shop" class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+          <!-- Vitrine de Produtos (7 colunas) -->
+          <div class="lg:col-span-7 bg-zinc-900 border border-zinc-800 rounded-2xl p-5">
+            <h3 class="font-bold text-white mb-4 flex items-center justify-between">
+              <span><i class="fa-solid fa-basket-shopping text-yellow-400 mr-2"></i>Produtos da Loja</span>
+              <span class="text-xs text-zinc-400 font-normal">Clique para adicionar ao carrinho</span>
+            </h3>
+            <div id="m2-products-grid" class="grid grid-cols-2 sm:grid-cols-3 gap-3"></div>
+          </div>
+
+          <!-- Carteira Inicial e Carrinho (5 colunas) -->
+          <div class="lg:col-span-5 bg-zinc-900 border border-zinc-800 rounded-2xl p-5 flex flex-col justify-between space-y-4">
+            <div>
+              <div class="flex items-center justify-between border-b border-zinc-800 pb-2 mb-3">
+                <h3 class="font-bold text-white text-sm flex items-center gap-2">
+                  <i class="fa-solid fa-wallet text-yellow-400"></i> Dinheiro na Sua Carteira
+                </h3>
+                <span id="m2-wallet-total" class="font-extrabold text-yellow-400 text-base">R$ 0,00</span>
+              </div>
+              <div id="m2-wallet-display" class="flex flex-wrap gap-2 bg-zinc-950 p-3 rounded-xl border border-zinc-800 min-h-[76px]"></div>
+            </div>
+
+            <div>
+              <div class="flex items-center justify-between border-b border-zinc-800 pb-2 mb-3">
+                <h3 class="font-bold text-white text-sm flex items-center gap-2">
+                  <i class="fa-solid fa-cart-arrow-down text-emerald-400"></i> Seu Carrinho
+                </h3>
+                <button onclick="clearM2Cart()" class="text-xs text-red-400 hover:text-red-300">Esvaziar</button>
+              </div>
+              <div id="m2-cart-list" class="space-y-2 max-h-[180px] overflow-y-auto bg-zinc-950 p-3 rounded-xl border border-zinc-800 min-h-[100px]">
+                <p class="text-zinc-500 text-xs text-center my-auto">Nenhum produto selecionado.</p>
+              </div>
+            </div>
+
+            <div class="pt-2 border-t border-zinc-800 space-y-3">
+              <div class="flex justify-between text-sm">
+                <span class="text-zinc-400">Total da Compra:</span>
+                <span id="m2-cart-total" class="font-extrabold text-lg text-white">R$ 0,00</span>
+              </div>
+              <div id="m2-shop-alert" class="hidden p-2.5 rounded-lg bg-red-500/20 border border-red-500/40 text-red-300 text-xs font-semibold"></div>
+              <button onclick="proceedToPayment()" class="w-full bg-yellow-400 hover:bg-yellow-300 text-black font-extrabold py-3 rounded-xl text-sm shadow transition flex items-center justify-center gap-2">
+                <span>Ir para o Caixa Pagar</span>
+                <i class="fa-solid fa-cash-register"></i>
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- ETAPA B: PAGAMENTO E CÁLCULO DE TROCO NO CAIXA -->
+        <div id="m2-step-checkout" class="hidden bg-zinc-900 border border-zinc-800 rounded-2xl p-6 space-y-6">
+          <div class="flex flex-wrap items-center justify-between gap-4 border-b border-zinc-800 pb-4">
+            <div>
+              <h3 class="text-lg font-extrabold text-white flex items-center gap-2">
+                <i class="fa-solid fa-cash-register text-yellow-400"></i>
+                <span>Caixa Registradora — Pagamento e Troco</span>
+              </h3>
+              <p class="text-xs text-zinc-400 mt-0.5">1º Escolha quais cédulas/moedas da sua carteira vai entregar. 2º Monte o troco correto na gaveta do caixa.</p>
+            </div>
+            <button onclick="backToShop()" class="text-xs bg-zinc-800 hover:bg-zinc-700 text-zinc-300 px-3 py-2 rounded-lg font-semibold">
+              <i class="fa-solid fa-arrow-left mr-1"></i> Voltar à Loja
+            </button>
+          </div>
+
+          <!-- Resumo Numérico -->
+          <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+            <div class="bg-zinc-950 border border-zinc-800 p-4 rounded-xl">
+              <span class="text-xs text-zinc-400 block">Valor Total da Compra</span>
+              <span id="chk-purchase-total" class="text-2xl font-extrabold text-white">R$ 0,00</span>
+            </div>
+            <div class="bg-zinc-950 border border-zinc-800 p-4 rounded-xl">
+              <span class="text-xs text-zinc-400 block">Valor Entregue por Você</span>
+              <span id="chk-paid-total" class="text-2xl font-extrabold text-yellow-400">R$ 0,00</span>
+            </div>
+            <div class="bg-zinc-950 border border-zinc-800 p-4 rounded-xl">
+              <span class="text-xs text-zinc-400 block">Troco Montado no Caixa</span>
+              <span id="chk-change-total" class="text-2xl font-extrabold text-emerald-400">R$ 0,00</span>
+            </div>
+          </div>
+
+          <!-- Passo 1: Selecionar cédulas/moedas da carteira para pagar -->
+          <div class="bg-zinc-950/70 border border-zinc-800 rounded-xl p-4 space-y-3">
+            <h4 class="text-sm font-bold text-yellow-400">Passo 1: Clique nas peças da sua carteira que você entregará ao operador de caixa</h4>
+            <div id="chk-wallet-selectable" class="flex flex-wrap gap-3"></div>
+          </div>
+
+          <!-- Passo 2: Gaveta do Caixa para montar o troco -->
+          <div class="bg-zinc-950/70 border border-zinc-800 rounded-xl p-4 space-y-4">
+            <div class="flex flex-wrap items-center justify-between gap-2">
+              <h4 class="text-sm font-bold text-emerald-400">Passo 2: Agora atue como Caixa! Selecione as cédulas e moedas do TROCO a devolver (se não houver troco, deixe vazio)</h4>
+              <button onclick="clearM2ChangeTray()" class="text-xs text-red-400 hover:text-red-300 font-semibold">
+                <i class="fa-solid fa-eraser mr-1"></i> Limpar Troco
+              </button>
+            </div>
+
+            <!-- Bandeja do troco montado -->
+            <div id="chk-change-tray" class="min-h-[84px] bg-zinc-900 border border-dashed border-zinc-700 rounded-xl p-3 flex flex-wrap gap-2 items-center">
+              <span class="text-xs text-zinc-500">Nenhuma peça selecionada para o troco.</span>
+            </div>
+
+            <!-- Paleta completa de moedas e cédulas do caixa -->
+            <div class="space-y-3 pt-2">
+              <div id="chk-drawer-coins" class="grid grid-cols-3 sm:grid-cols-6 gap-2.5"></div>
+              <div id="chk-drawer-bills" class="grid grid-cols-2 sm:grid-cols-7 gap-2.5"></div>
+            </div>
+          </div>
+
+          <div id="m2-checkout-feedback" class="hidden p-4 rounded-xl text-sm font-bold"></div>
+
+          <button onclick="verifyM2Checkout()" class="w-full bg-emerald-500 hover:bg-emerald-400 text-black font-extrabold py-4 rounded-xl text-base shadow-lg transition flex items-center justify-center gap-2">
+            <i class="fa-solid fa-circle-check"></i>
+            <span>Finalizar Pagamento e Conferir Troco</span>
+          </button>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- =========================================================
+         TELA 3: PAINEL DO PROFESSOR (RELATÓRIOS A4, IMAGENS E CONFIG)
+         ========================================================= -->
+    <section id="screen-teacher" class="hidden space-y-6 print-container">
+
+      <!-- Barra de Controle do Professor (Oculta na impressão) -->
+      <div class="no-print bg-zinc-900 border border-zinc-800 rounded-2xl p-4 flex flex-wrap items-center justify-between gap-4">
+        <div class="flex flex-wrap gap-2">
+          <button id="ptab-reports" onclick="switchTeacherTab('reports')" class="px-4 py-2 rounded-xl text-xs sm:text-sm font-bold bg-yellow-400 text-black">
+            <i class="fa-solid fa-table-list mr-1"></i> Relatórios & Impressão A4
+          </button>
+          <button id="ptab-media" onclick="switchTeacherTab('media')" class="px-4 py-2 rounded-xl text-xs sm:text-sm font-bold bg-zinc-800 text-zinc-300 hover:bg-zinc-700">
+            <i class="fa-solid fa-images mr-1"></i> Imagens Reais (Cédulas e Moedas)
+          </button>
+          <button id="ptab-settings" onclick="switchTeacherTab('settings')" class="px-4 py-2 rounded-xl text-xs sm:text-sm font-bold bg-zinc-800 text-zinc-300 hover:bg-zinc-700">
+            <i class="fa-solid fa-sliders mr-1"></i> Configurações & Backup
+          </button>
+        </div>
+
+        <button onclick="exitTeacherPanel()" class="bg-zinc-800 hover:bg-zinc-700 text-white px-4 py-2 rounded-xl text-xs font-bold flex items-center gap-2">
+          <i class="fa-solid fa-arrow-left"></i> Voltar ao Sistema
+        </button>
+      </div>
+
+      <!-- SUB-ABA 1: RELATÓRIOS E IMPRESSÃO -->
+      <div id="teacher-tab-reports" class="space-y-4">
+        <div class="no-print bg-zinc-900 border border-zinc-800 rounded-2xl p-4 flex flex-wrap items-end justify-between gap-4">
+          <div class="flex flex-wrap items-end gap-3">
+            <div>
+              <label class="block text-[11px] uppercase text-zinc-400 font-bold mb-1">Filtrar por Turma</label>
+              <select id="filter-class" onchange="renderReportsTable()" class="bg-zinc-950 border border-zinc-700 rounded-lg px-3 py-2 text-sm text-white">
+                <option value="ALL">Todas as Turmas</option>
+              </select>
+            </div>
+            <div>
+              <label class="block text-[11px] uppercase text-zinc-400 font-bold mb-1">Filtrar por Módulo</label>
+              <select id="filter-module" onchange="renderReportsTable()" class="bg-zinc-950 border border-zinc-700 rounded-lg px-3 py-2 text-sm text-white">
+                <option value="ALL">Todos os Módulos</option>
+                <option value="Casa de Câmbio">Módulo 1 — Casa de Câmbio</option>
+                <option value="Mercadinho & Troco">Módulo 2 — Mercadinho & Troco</option>
+              </select>
+            </div>
+            <div>
+              <label class="block text-[11px] uppercase text-zinc-400 font-bold mb-1">Buscar Aluno</label>
+              <input type="text" id="filter-student" oninput="renderReportsTable()" placeholder="Nome do aluno..."
+                     class="bg-zinc-950 border border-zinc-700 rounded-lg px-3 py-2 text-sm text-white" />
+            </div>
+          </div>
+
+          <div class="flex items-center gap-2">
+            <button onclick="loadReportsFromFirebase()" class="bg-zinc-800 hover:bg-zinc-700 text-zinc-200 px-3.5 py-2 rounded-lg text-xs font-bold flex items-center gap-1.5">
+              <i class="fa-solid fa-sync"></i> Atualizar
+            </button>
+            <button onclick="printReport()" class="bg-yellow-400 hover:bg-yellow-300 text-black px-4 py-2 rounded-lg text-xs font-extrabold flex items-center gap-1.5 shadow">
+              <i class="fa-solid fa-print"></i> Imprimir Relatório (A4)
+            </button>
+          </div>
+        </div>
+
+        <!-- Tabela de Resultados -->
+        <div class="bg-zinc-900 border border-zinc-800 rounded-2xl p-4 overflow-x-auto print-container">
+          <table class="w-full text-left border-collapse text-xs sm:text-sm">
+            <thead>
+              <tr class="border-b border-zinc-700 text-zinc-300 bg-zinc-950">
+                <th class="p-3">Data / Hora</th>
+                <th class="p-3">Estudante</th>
+                <th class="p-3">Turma</th>
+                <th class="p-3">Módulo</th>
+                <th class="p-3">Desafio Sorteado & Resposta</th>
+                <th class="p-3 text-center">Tentativas</th>
+                <th class="p-3 text-center">Status</th>
+              </tr>
+            </thead>
+            <tbody id="reports-tbody" class="divide-y divide-zinc-800">
+              <tr><td colspan="7" class="p-6 text-center text-zinc-500">Carregando registros...</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- SUB-ABA 2: GERENCIADOR DE IMAGENS DAS CÉDULAS E MOEDAS -->
+      <div id="teacher-tab-media" class="no-print hidden space-y-4">
+        <div class="bg-zinc-900 border border-zinc-800 rounded-2xl p-5">
+          <h2 class="text-lg font-bold text-white">Cadastro de Imagens Reais (Cédulas e Moedas do Real)</h2>
+          <p class="text-xs text-zinc-400 mt-1">
+            Envie arquivos PNG/JPG diretamente para o <strong>Firebase Storage</strong> ou cole a URL da imagem. As alterações são salvas no <strong>Firestore</strong> e atualizadas automaticamente para todos os alunos.
+          </p>
+        </div>
+
+        <div id="media-manager-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4"></div>
+      </div>
+
+      <!-- SUB-ABA 3: CONFIGURAÇÕES PEDAGÓGICAS E BACKUP JSON -->
+      <div id="teacher-tab-settings" class="no-print hidden grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div class="bg-zinc-900 border border-zinc-800 rounded-2xl p-6 space-y-4">
+          <h3 class="font-bold text-white text-base flex items-center gap-2">
+            <i class="fa-solid fa-graduation-cap text-yellow-400"></i> Parâmetros Pedagógicos da Turma
+          </h3>
+
+          <div>
+            <label class="block text-xs font-bold uppercase text-zinc-400 mb-1">Nível de Dificuldade do Sorteio</label>
+            <select id="cfg-difficulty" class="w-full bg-zinc-950 border border-zinc-700 rounded-xl px-3 py-2.5 text-sm text-white">
+              <option value="1">Nível 1 — Básico (Valores inteiros: R$ 1 a R$ 50)</option>
+              <option value="2">Nível 2 — Intermediário (Reais + centavos de R$ 0,05, R$ 0,10, R$ 0,25, R$ 0,50)</option>
+              <option value="3">Nível 3 — Completo (Todas as cédulas até R$ 100 e moedas incluindo R$ 0,01)</option>
+            </select>
+          </div>
+
+          <div class="flex items-center justify-between bg-zinc-950 border border-zinc-800 p-3.5 rounded-xl">
+            <div>
+              <span class="text-sm font-semibold text-white block">Mostrar Soma Automática na Bandeja</span>
+              <span class="text-xs text-zinc-400">Desative para forçar o aluno a somar mentalmente ou no caderno.</span>
+            </div>
+            <input type="checkbox" id="cfg-show-sum" class="w-5 h-5 accent-yellow-400" checked />
+          </div>
+
+          <div>
+            <label class="block text-xs font-bold uppercase text-zinc-400 mb-1">Alterar Senha do Professor</label>
+            <input type="text" id="cfg-admin-pass" class="w-full bg-zinc-950 border border-zinc-700 rounded-xl px-3 py-2.5 text-sm text-white" />
+          </div>
+
+          <button onclick="saveTeacherSettings()" class="w-full bg-yellow-400 hover:bg-yellow-300 text-black font-extrabold py-3 rounded-xl text-sm transition">
+            Salvar Configurações no Firebase
+          </button>
+        </div>
+
+        <div class="bg-zinc-900 border border-zinc-800 rounded-2xl p-6 space-y-4">
+          <h3 class="font-bold text-white text-base flex items-center gap-2">
+            <i class="fa-solid fa-database text-emerald-400"></i> Segurança e Backup de Dados (JSON)
+          </h3>
+          <p class="text-xs text-zinc-400">
+            Exporte uma cópia de segurança completa dos registros dos alunos, configurações e links das imagens das cédulas/moedas, ou restaure um arquivo anterior.
+          </p>
+
+          <button onclick="exportBackupJSON()" class="w-full bg-zinc-800 hover:bg-zinc-700 text-white font-bold py-3 rounded-xl text-sm flex items-center justify-center gap-2 border border-zinc-700">
+            <i class="fa-solid fa-download text-yellow-400"></i> Baixar Backup Completo (.JSON)
+          </button>
+
+          <div class="pt-2">
+            <label class="block text-xs font-bold uppercase text-zinc-400 mb-1">Restaurar Backup (.JSON)</label>
+            <input type="file" id="import-json-file" accept=".json" onchange="importBackupJSON(event)"
+                   class="w-full text-xs text-zinc-300 file:mr-3 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-xs file:font-bold file:bg-emerald-500 file:text-black hover:file:bg-emerald-400" />
+          </div>
+
+          <div class="pt-4 border-t border-zinc-800">
+            <button onclick="clearAllReports()" class="w-full bg-red-950/60 hover:bg-red-900/60 text-red-300 border border-red-800/60 font-bold py-2.5 rounded-xl text-xs">
+              <i class="fa-solid fa-triangle-exclamation mr-1"></i> Limpar Histórico de Relatórios
+            </button>
+          </div>
+        </div>
+      </div>
+
+    </section>
+  </main>
+
+  <!-- =========================================================
+       MODAL DE SENHA DO PROFESSOR (NO-PRINT)
+       ========================================================= -->
+  <div id="teacher-auth-modal" class="no-print hidden fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+    <div class="bg-zinc-900 border border-zinc-700 rounded-2xl max-w-sm w-full p-6 space-y-4 shadow-2xl">
+      <div class="flex items-center justify-between">
+        <h3 class="font-bold text-white text-lg flex items-center gap-2">
+          <i class="fa-solid fa-lock text-yellow-400"></i> Acesso Restrito
+        </h3>
+        <button onclick="closeTeacherModal()" class="text-zinc-400 hover:text-white">
+          <i class="fa-solid fa-xmark text-lg"></i>
+        </button>
+      </div>
+      <p class="text-xs text-zinc-400">Digite a senha administrativa para acessar relatórios, imagens das cédulas e níveis da turma.</p>
+      <input type="password" id="teacher-pass-input" placeholder="Senha (padrão: admin123)"
+             onkeydown="if(event.key==='Enter') verifyTeacherPassword()"
+             class="w-full bg-zinc-950 border border-zinc-700 focus:border-yellow-400 rounded-xl px-4 py-3 text-white outline-none" />
+      <p id="teacher-auth-error" class="hidden text-xs text-red-400 font-semibold">Senha incorreta.</p>
+      <button onclick="verifyTeacherPassword()" class="w-full bg-yellow-400 hover:bg-yellow-300 text-black font-extrabold py-3 rounded-xl text-sm">
+        Acessar Painel
+      </button>
+    </div>
+  </div>
+
+  <!-- =========================================================
+       RODAPÉ DO SISTEMA E DE IMPRESSÃO
+       ========================================================= -->
+  <footer class="no-print bg-zinc-950 border-t border-zinc-800 py-4 text-center text-xs text-zinc-400 mt-10">
+    Desenvolvido por <strong class="text-yellow-400">Ricardo Wagner</strong>
+  </footer>
+
+  <div class="print-only hidden print-footer">
+    Desenvolvido por Ricardo Wagner
+  </div>
+
+  <!-- =========================================================
+       LÓGICA DA APLICAÇÃO + INTEGRAÇÃO FIREBASE
+       ========================================================= -->
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+    import {
+      getFirestore, collection, doc, setDoc, getDoc, getDocs, addDoc, deleteDoc, query, orderBy
+    } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+    import {
+      getStorage, ref, uploadBytes, getDownloadURL
+    } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-storage.js";
+
+    // =========================================================================
+    // 1. CONFIGURAÇÃO DO FIREBASE (SUBSTITUA PELAS CREDENCIAIS DO SEU PROJETO)
+    // =========================================================================
+    const firebaseConfig = {
+      apiKey: "SUA_API_KEY_AQUI",
+      authDomain: "SEU_PROJETO.firebaseapp.com",
+      projectId: "SEU_PROJETO",
+      storageBucket: "SEU_PROJETO.appspot.com",
+      messagingSenderId: "000000000000",
+      appId: "1:000000000000:web:000000000000"
+    };
+
+    let db = null;
+    let storage = null;
+    let firebaseReady = false;
+
+    const statusBadge = document.getElementById("firebase-status-badge");
+
+    try {
+      if (firebaseConfig.apiKey && !firebaseConfig.apiKey.includes("SUA_API_KEY")) {
+        const app = initializeApp(firebaseConfig);
+        db = getFirestore(app);
+        storage = getStorage(app);
+        firebaseReady = true;
+        statusBadge.innerHTML = `<i class="fa-solid fa-circle text-[7px] text-emerald-400"></i> Firebase Conectado`;
+      } else {
+        statusBadge.innerHTML = `<i class="fa-solid fa-circle text-[7px] text-amber-400"></i> Modo Local (Configure o Firebase)`;
+      }
+    } catch (err) {
+      console.error("Erro ao inicializar Firebase:", err);
+      statusBadge.innerHTML = `<i class="fa-solid fa-circle text-[7px] text-red-400"></i> Erro Firebase (Modo Local)`;
+    }
+
+    // =========================================================================
+    // 2. CATÁLOGO OFICIAL DAS MOEDAS E CÉDULAS DO REAL (EM CENTAVOS INTEIROS)
+    // =========================================================================
+    const DENOMINATIONS = [
+      // Moedas
+      { id: "m_1",   type: "coin", cents: 1,     label: "1 centavo",   short: "R$ 0,01", color: "bg-amber-800 border-amber-500 text-amber-100", imageUrl: "" },
+      { id: "m_5",   type: "coin", cents: 5,     label: "5 centavos",  short: "R$ 0,05", color: "bg-orange-800 border-orange-400 text-orange-100", imageUrl: "" },
+      { id: "m_10",  type: "coin", cents: 10,    label: "10 centavos", short: "R$ 0,10", color: "bg-yellow-600 border-yellow-300 text-zinc-950", imageUrl: "" },
+      { id: "m_25",  type: "coin", cents: 25,    label: "25 centavos", short: "R$ 0,25", color: "bg-yellow-500 border-yellow-200 text-zinc-950", imageUrl: "" },
+      { id: "m_50",  type: "coin", cents: 50,    label: "50 centavos", short: "R$ 0,50", color: "bg-zinc-300 border-white text-zinc-950", imageUrl: "" },
+      { id: "m_100", type: "coin", cents: 100,   label: "1 real (Moeda)", short: "R$ 1,00", color: "bg-amber-400 border-zinc-200 text-zinc-950", imageUrl: "" },
+      // Cédulas
+      { id: "c_100",   type: "bill", cents: 100,   label: "1 real (Cédula)", short: "R$ 1,00",   color: "bg-emerald-700 border-emerald-300 text-white", imageUrl: "" },
+      { id: "c_200",   type: "bill", cents: 200,   label: "2 reais",         short: "R$ 2,00",   color: "bg-sky-700 border-sky-300 text-white", imageUrl: "" },
+      { id: "c_500",   type: "bill", cents: 500,   label: "5 reais",         short: "R$ 5,00",   color: "bg-purple-700 border-purple-300 text-white", imageUrl: "" },
+      { id: "c_1000",  type: "bill", cents: 1000,  label: "10 reais",        short: "R$ 10,00",  color: "bg-rose-700 border-rose-300 text-white", imageUrl: "" },
+      { id: "c_2000",  type: "bill", cents: 2000,  label: "20 reais",        short: "R$ 20,00",  color: "bg-amber-600 border-amber-200 text-white", imageUrl: "" },
+      { id: "c_5000",  type: "bill", cents: 5000,  label: "50 reais",        short: "R$ 50,00",  color: "bg-orange-700 border-amber-300 text-white", imageUrl: "" },
+      { id: "c_10000", type: "bill", cents: 10000, label: "100 reais",       short: "R$ 100,00", color: "bg-cyan-700 border-cyan-200 text-white", imageUrl: "" }
+    ];
+
+    const STORE_CATALOG = [
+      { id: "p1", name: "Caderno Brochura", icon: "fa-book" },
+      { id: "p2", name: "Caixa de Lápis", icon: "fa-pencil" },
+      { id: "p3", name: "Suco Natural", icon: "fa-glass-water" },
+      { id: "p4", name: "Sanduíche Natural", icon: "fa-burger" },
+      { id: "p5", name: "Borracha Escolar", icon: "fa-eraser" },
+      { id: "p6", name: "Régua 30cm", icon: "fa-ruler" },
+      { id: "p7", name: "Maçã", icon: "fa-apple-whole" },
+      { id: "p8", name: "Garrafa Térmica", icon: "fa-bottle-water" },
+      { id: "p9", name: "Mochila Escolar", icon: "fa-briefcase" }
+    ];
+
+    // Estado Global
+    let appSettings = {
+      difficulty: 2,
+      showSum: true,
+      adminPass: "admin123"
+    };
+
+    let currentStudent = null;
+    let sessionScore = 0;
+    let allReports = [];
+
+    // Estado Módulo 1
+    let m1Challenge = null;
+    let m1Tray = [];
+    let m1Attempts = 0;
+
+    // Estado Módulo 2
+    let m2Scenario = null;
+    let m2Cart = [];
+    let m2SelectedWalletIndices = [];
+    let m2ChangeTray = [];
+    let m2Attempts = 0;
+
+    // Utilitário de Formatação BRL
+    function formatBRL(cents) {
+      return (cents / 100).toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
+    }
+
+    // =========================================================================
+    // 3. SINCRONIZAÇÃO COM FIRESTORE (CONFIGURAÇÕES E IMAGENS)
+    // =========================================================================
+    async function loadSystemData() {
+      // Tenta carregar fallback local primeiro
+      const localMedia = localStorage.getItem("fin_lab_media");
+      if (localMedia) {
+        const parsed = JSON.parse(localMedia);
+        DENOMINATIONS.forEach(d => {
+          if (parsed[d.id]) d.imageUrl = parsed[d.id];
+        });
+      }
+      const localCfg = localStorage.getItem("fin_lab_cfg");
+      if (localCfg) {
+        appSettings = { ...appSettings, ...JSON.parse(localCfg) };
+      }
+
+      if (firebaseReady) {
+        try {
+          const cfgSnap = await getDoc(doc(db, "fin_educacao_config", "geral"));
+          if (cfgSnap.exists()) {
+            appSettings = { ...appSettings, ...cfgSnap.data() };
+          }
+
+          const mediaSnap = await getDocs(collection(db, "fin_educacao_moedas"));
+          mediaSnap.forEach(docSnap => {
+            const found = DENOMINATIONS.find(d => d.id === docSnap.id);
+            if (found && docSnap.data().imageUrl) {
+              found.imageUrl = docSnap.data().imageUrl;
+            }
+          });
+        } catch (e) {
+          console.warn("Aviso ao ler configurações do Firestore:", e);
+        }
+      }
+
+      applySettingsToUI();
+      renderPalettes();
+    }
+
+    function applySettingsToUI() {
+      const levelNames = {
+        1: "Nível 1 — Básico (Inteiros)",
+        2: "Nível 2 — Intermediário",
+        3: "Nível 3 — Completo (com R$ 0,01)"
+      };
+      document.getElementById("login-active-level").textContent = levelNames[appSettings.difficulty] || levelNames[2];
+      document.getElementById("student-level-badge").textContent = `Nível ${appSettings.difficulty}`;
+      document.getElementById("cfg-difficulty").value = String(appSettings.difficulty);
+      document.getElementById("cfg-show-sum").checked = Boolean(appSettings.showSum);
+      document.getElementById("cfg-admin-pass").value = appSettings.adminPass;
+
+      const sumRow = document.getElementById("m1-auto-sum-row");
+      if (appSettings.showSum) {
+        sumRow.classList.remove("hidden");
+      } else {
+        sumRow.classList.add("hidden");
+      }
+    }
+
+    // =========================================================================
+    // 4. RENDERIZAÇÃO VISUAL DE CÉDULAS E MOEDAS (IMAGEM REAL OU FALLBACK)
+    // =========================================================================
+    function createMoneyButtonHTML(item, onClickAttr, extraBadge = "") {
+      if (item.imageUrl) {
+        return `
+          <button type="button" onclick="${onClickAttr}" class="money-item bg-zinc-950 border border-zinc-700 rounded-xl p-2 flex flex-col items-center justify-between relative group">
+            ${extraBadge}
+            <img src="${item.imageUrl}" alt="${item.label}" class="${item.type === 'coin' ? 'w-14 h-14 object-contain rounded-full' : 'w-full h-16 object-contain rounded'}" />
+            <span class="text-[11px] font-bold text-zinc-200 mt-1.5 group-hover:text-yellow-400">${item.short}</span>
+            <span class="text-[9px] text-zinc-500 leading-none">${item.type === 'coin' ? 'Moeda' : 'Cédula'}</span>
+          </button>
+        `;
+      }
+
+      if (item.type === "coin") {
+        return `
+          <button type="button" onclick="${onClickAttr}" class="money-item bg-zinc-950 border border-zinc-800 rounded-xl p-2.5 flex flex-col items-center justify-center relative">
+            ${extraBadge}
+            <div class="coin-circle w-14 h-14 ${item.color} font-extrabold text-xs">
+              <span>${item.short.replace("R$ ", "")}</span>
+            </div>
+            <span class="text-[10px] font-semibold text-zinc-300 mt-1.5">${item.label}</span>
+          </button>
+        `;
+      } else {
+        return `
+          <button type="button" onclick="${onClickAttr}" class="money-item bg-zinc-950 border border-zinc-800 rounded-xl p-2 flex flex-col items-center justify-center relative">
+            ${extraBadge}
+            <div class="bill-rect w-full h-14 ${item.color} font-extrabold text-sm px-2">
+              <span class="text-[9px] uppercase tracking-widest opacity-80">República</span>
+              <span>${item.short}</span>
+            </div>
+            <span class="text-[10px] font-semibold text-zinc-300 mt-1">${item.label}</span>
+          </button>
+        `;
+      }
+    }
+
+    function renderPalettes() {
+      const coins = DENOMINATIONS.filter(d => d.type === "coin");
+      const bills = DENOMINATIONS.filter(d => d.type === "bill");
+
+      // Módulo 1
+      document.getElementById("m1-coins-palette").innerHTML = coins
+        .map(c => createMoneyButtonHTML(c, `addToM1Tray('${c.id}')`)).join("");
+      document.getElementById("m1-bills-palette").innerHTML = bills
+        .map(b => createMoneyButtonHTML(b, `addToM1Tray('${b.id}')`)).join("");
+
+      // Módulo 2 (Gaveta do Caixa)
+      document.getElementById("chk-drawer-coins").innerHTML = coins
+        .map(c => createMoneyButtonHTML(c, `addToM2Change('${c.id}')`)).join("");
+      document.getElementById("chk-drawer-bills").innerHTML = bills
+        .map(b => createMoneyButtonHTML(b, `addToM2Change('${b.id}')`)).join("");
+    }
+
+    // =========================================================================
+    // 5. GERADOR ALEATÓRIO INTELIGENTE — MÓDULO 1 (CASA DE CÂMBIO)
+    // =========================================================================
+    window.generateExchangeChallenge = function() {
+      m1Tray = [];
+      m1Attempts = 0;
+      document.getElementById("m1-feedback").classList.add("hidden");
+      renderM1Tray();
+
+      const diff = Number(appSettings.difficulty);
+      const templates = [];
+
+      if (diff === 1) {
+        // Nível 1: Valores inteiros e equivalências clássicas
+        templates.push(
+          {
+            targetCents: 5000,
+            title: "Troque 1 cédula de R$ 50,00 por outras cédulas equivalentes.",
+            rule: "Obrigatório usar exatamente 1 cédula de R$ 10,00 na sua resposta.",
+            validate: (tray) => {
+              const c10 = tray.filter(i => i.id === "c_1000").length;
+              const c50 = tray.filter(i => i.id === "c_5000").length;
+              if (c50 > 0) return "Não use outra cédula de R$ 50,00 para trocar ela mesma.";
+              if (c10 !== 1) return "A regra pede exatamente 1 cédula de R$ 10,00.";
+              return null;
+            }
+          },
+          {
+            targetCents: 2000,
+            title: "Troque 1 cédula de R$ 20,00 sem usar cédulas de R$ 10,00.",
+            rule: "Proibido usar cédulas de R$ 10,00 ou de R$ 20,00.",
+            validate: (tray) => {
+              if (tray.some(i => i.id === "c_1000" || i.id === "c_2000")) {
+                return "Você usou cédulas de R$ 10,00 ou R$ 20,00, o que é proibido nesta regra.";
+              }
+              return null;
+            }
+          },
+          {
+            targetCents: 1000,
+            title: "Forme R$ 10,00 usando cédulas de R$ 2,00 e R$ 1,00 (ou moeda de R$ 1,00).",
+            rule: "Use exatamente 6 peças (cédulas ou moedas) no total.",
+            validate: (tray) => {
+              if (tray.length !== 6) return `Você usou ${tray.length} peças, mas a regra exige exatamente 6 peças.`;
+              return null;
+            }
+          },
+          {
+            targetCents: 10000,
+            title: "Troque 1 cédula de R$ 100,00 usando pelo menos 3 tipos diferentes de cédulas.",
+            rule: "Não use cédula de R$ 100,00 e combine no mínimo 3 valores diferentes.",
+            validate: (tray) => {
+              if (tray.some(i => i.id === "c_10000")) return "Não utilize cédula de R$ 100,00.";
+              const uniqueTypes = new Set(tray.map(i => i.cents)).size;
+              if (uniqueTypes < 3) return "Use pelo menos 3 valores diferentes de cédulas/moedas.";
+              return null;
+            }
+          }
+        );
+      } else if (diff === 2) {
+        // Nível 2: Reais + centavos (5, 10, 25, 50)
+        const randomTargets = [150, 275, 340, 485, 630];
+        const chosen = randomTargets[Math.floor(Math.random() * randomTargets.length)];
+        templates.push(
+          {
+            targetCents: chosen,
+            title: `Forme exatamente ${formatBRL(chosen)} sem usar moedas de R$ 0,50.`,
+            rule: "Proibido utilizar moedas de 50 centavos.",
+            validate: (tray) => {
+              if (tray.some(i => i.id === "m_50")) return "Regra violada: não use moedas de R$ 0,50.";
+              return null;
+            }
+          },
+          {
+            targetCents: 5000,
+            title: "Troque 1 cédula de R$ 50,00 usando 1 cédula de R$ 20,00, 2 cédulas de R$ 10,00 e o restante em moedas.",
+            rule: "Complete o valor de R$ 50,00 respeitando as cédulas indicadas.",
+            validate: (tray) => {
+              const c20 = tray.filter(i => i.id === "c_2000").length;
+              const c10 = tray.filter(i => i.id === "c_1000").length;
+              const otherBills = tray.filter(i => i.type === "bill" && i.id !== "c_2000" && i.id !== "c_1000").length;
+              if (c20 !== 1 || c10 !== 2 || otherBills > 0) {
+                return "Use exatamente 1 cédula de R$ 20,00, 2 de R$ 10,00 e complete os R$ 10,00 restantes apenas com moedas.";
+              }
+              return null;
+            }
+          },
+          {
+            targetCents: 200,
+            title: "Você tem 4 moedas de R$ 0,25 e 10 moedas de R$ 0,10. Troque tudo pela MENOR quantidade possível de peças.",
+            rule: "Equivalência para cima: use no máximo 1 cédula ou 2 moedas.",
+            validate: (tray) => {
+              if (tray.length > 2) return `É possível representar ${formatBRL(200)} com apenas 1 cédula de R$ 2,00 (ou 2 moedas de R$ 1,00).`;
+              return null;
+            }
+          }
+        );
+      } else {
+        // Nível 3: Completo incluindo 1 centavo e cédula de 1 real
+        const randomCents = [137, 268, 493, 742, 1189];
+        const chosen = randomCents[Math.floor(Math.random() * randomCents.length)];
+        templates.push(
+          {
+            targetCents: chosen,
+            title: `Monte exatamente ${formatBRL(chosen)} usando moedas de centavos (incluindo R$ 0,01).`,
+            rule: "Use a menor quantidade possível de moedas para os centavos.",
+            validate: (tray) => {
+              const coinsCount = tray.filter(i => i.type === "coin").length;
+              if (coinsCount > 9) return "Tente agrupar os centavos usando moedas maiores (R$ 0,50, R$ 0,25, R$ 0,10, R$ 0,05) em vez de muitas moedas pequenas.";
+              return null;
+            }
+          },
+          {
+            targetCents: 100,
+            title: "Troque 1 cédula de R$ 1,00 por moedas de centavos sem usar moedas de R$ 0,50.",
+            rule: "Use pelo menos 2 moedas de R$ 0,05 e 5 moedas de R$ 0,01 no conjunto.",
+            validate: (tray) => {
+              if (tray.some(i => i.id === "m_50" || i.id === "m_100" || i.type === "bill")) {
+                return "Use apenas moedas menores que R$ 0,50.";
+              }
+              const m5 = tray.filter(i => i.id === "m_5").length;
+              const m1 = tray.filter(i => i.id === "m_1").length;
+              if (m5 < 2 || m1 < 5) return "Inclua pelo menos 2 moedas de R$ 0,05 e 5 moedas de R$ 0,01.";
+              return null;
+            }
+          },
+          {
+            targetCents: 5000,
+            title: "Troque R$ 50,00 combinando cédulas de R$ 20,00, R$ 10,00, R$ 5,00, R$ 2,00 e R$ 1,00.",
+            rule: "Use pelo menos uma cédula de cada um desses 5 valores.",
+            validate: (tray) => {
+              const req = ["c_2000", "c_1000", "c_500", "c_200", "c_100"];
+              const missing = req.filter(id => !tray.some(t => t.id === id));
+              if (missing.length > 0) return "Faltou incluir pelo menos uma cédula de cada valor exigido (R$ 20, R$ 10, R$ 5, R$ 2 e R$ 1).";
+              return null;
+            }
+          }
+        );
+      }
+
+      // Escolhe aleatoriamente um template e aplica pequena variação quando cabível
+      m1Challenge = templates[Math.floor(Math.random() * templates.length)];
+      document.getElementById("m1-prompt-title").textContent = m1Challenge.title;
+      document.getElementById("m1-prompt-rule").innerHTML = `<i class="fa-solid fa-circle-exclamation"></i> <span>${m1Challenge.rule}</span>`;
+    };
+
+    window.addToM1Tray = function(denomId) {
+      const item = DENOMINATIONS.find(d => d.id === denomId);
+      if (!item) return;
+      m1Tray.push(item);
+      renderM1Tray();
+    };
+
+    window.removeFromM1Tray = function(index) {
+      m1Tray.splice(index, 1);
+      renderM1Tray();
+    };
+
+    window.clearM1Tray = function() {
+      m1Tray = [];
+      renderM1Tray();
+    };
+
+    function renderM1Tray() {
+      const container = document.getElementById("m1-tray-items");
+      if (m1Tray.length === 0) {
+        container.innerHTML = `<p class="text-zinc-500 text-sm m-auto text-center">Clique nas moedas ou cédulas ao lado para montar o valor solicitado.</p>`;
+      } else {
+        container.innerHTML = m1Tray.map((item, idx) => `
+          <button type="button" onclick="removeFromM1Tray(${idx})" title="Clique para remover"
+                  class="px-2.5 py-1.5 rounded-lg border text-xs font-bold flex items-center gap-1.5 ${item.color} hover:opacity-80 transition">
+            <span>${item.short}</span>
+            <span class="text-[10px] opacity-80">(${item.type === 'coin' ? 'M' : 'C'})</span>
+            <i class="fa-solid fa-xmark text-[10px] ml-1"></i>
+          </button>
+        `).join("");
+      }
+
+      const totalCents = m1Tray.reduce((acc, i) => acc + i.cents, 0);
+      document.getElementById("m1-piece-count").textContent = `${m1Tray.length} ${m1Tray.length === 1 ? 'peça' : 'peças'}`;
+      document.getElementById("m1-tray-total").textContent = formatBRL(totalCents);
+    }
+
+    window.checkM1Answer = async function() {
+      if (!m1Challenge) return;
+      m1Attempts++;
+      const totalCents = m1Tray.reduce((acc, i) => acc + i.cents, 0);
+      const fb = document.getElementById("m1-feedback");
+      fb.classList.remove("hidden", "bg-red-500/20", "text-red-300", "border-red-500/40", "bg-emerald-500/20", "text-emerald-300", "border-emerald-500/40");
+      fb.classList.add("border");
+
+      if (totalCents !== m1Challenge.targetCents) {
+        fb.classList.add("bg-red-500/20", "text-red-300", "border-red-500/40");
+        const diffMsg = totalCents < m1Challenge.targetCents ? "Ainda falta dinheiro para atingir o valor alvo." : "O valor na bandeja ultrapassou o valor alvo.";
+        fb.innerHTML = `<i class="fa-solid fa-circle-xmark mr-1"></i> Valor incorreto (${formatBRL(totalCents)}). ${diffMsg}`;
+        return;
+      }
+
+      const ruleError = m1Challenge.validate(m1Tray);
+      if (ruleError) {
+        fb.classList.add("bg-red-500/20", "text-red-300", "border-red-500/40");
+        fb.innerHTML = `<i class="fa-solid fa-triangle-exclamation mr-1"></i> O valor soma ${formatBRL(totalCents)}, mas atenção à regra: ${ruleError}`;
+        return;
+      }
+
+      // Acerto!
+      fb.classList.add("bg-emerald-500/20", "text-emerald-300", "border-emerald-500/40");
+      fb.innerHTML = `<i class="fa-solid fa-circle-check mr-1"></i> Excelente! Troca realizada com sucesso (${formatBRL(totalCents)}). Clique em "Novo Sorteio" para o próximo desafio.`;
+
+      sessionScore++;
+      document.getElementById("session-score").textContent = sessionScore;
+
+      const summaryPieces = m1Tray.map(i => i.short).join(" + ");
+      await saveReportRecord({
+        module: "Casa de Câmbio",
+        detail: `${m1Challenge.title} | Resposta: [${summaryPieces}]`,
+        attempts: m1Attempts,
+        status: "Concluído"
+      });
+    };
+
+    // =========================================================================
+    // 6. GERADOR ALEATÓRIO INTELIGENTE — MÓDULO 2 (MERCADINHO & TROCO)
+    // =========================================================================
+    window.generateMarketScenario = function() {
+      m2Cart = [];
+      m2SelectedWalletIndices = [];
+      m2ChangeTray = [];
+      m2Attempts = 0;
+
+      document.getElementById("m2-step-shop").classList.remove("hidden");
+      document.getElementById("m2-step-checkout").classList.add("hidden");
+      document.getElementById("m2-shop-alert").classList.add("hidden");
+      document.getElementById("m2-checkout-feedback").classList.add("hidden");
+
+      const diff = Number(appSettings.difficulty);
+
+      // 1. Sorteia uma carteira inicial realista conforme o nível
+      let walletPool = [];
+      if (diff === 1) {
+        walletPool = [
+          ["c_2000"],
+          ["c_5000"],
+          ["c_1000", "c_500", "c_200"],
+          ["c_2000", "c_1000"]
+        ];
+      } else if (diff === 2) {
+        walletPool = [
+          ["c_2000", "m_50"],
+          ["c_5000", "m_25", "m_10"],
+          ["c_1000", "c_500", "m_50", "m_25"],
+          ["c_2000", "c_200", "m_10"]
+        ];
+      } else {
+        walletPool = [
+          ["c_5000", "m_10", "m_5", "m_1"],
+          ["c_2000", "c_100", "m_25", "m_1", "m_1"],
+          ["c_10000", "m_50", "m_5"],
+          ["c_2000", "c_500", "m_10", "m_1", "m_1", "m_1"]
+        ];
+      }
+
+      const chosenIds = walletPool[Math.floor(Math.random() * walletPool.length)];
+      const walletItems = chosenIds.map(id => DENOMINATIONS.find(d => d.id === id));
+      const walletTotalCents = walletItems.reduce((acc, i) => acc + i.cents, 0);
+
+      // 2. Gera 6 produtos com preços aleatórios garantidamente menores que a carteira
+      const shuffledProducts = [...STORE_CATALOG].sort(() => 0.5 - Math.random()).slice(0, 6);
+      const maxItemPrice = Math.max(300, Math.floor(walletTotalCents * 0.65));
+
+      const products = shuffledProducts.map(prod => {
+        let priceCents = 0;
+        if (diff === 1) {
+          // Inteiros em reais (ex: R$ 2,00 a R$ 18,00)
+          const reais = Math.floor(Math.random() * Math.max(2, Math.floor(maxItemPrice / 100))) + 1;
+          priceCents = reais * 100;
+        } else if (diff === 2) {
+          // Múltiplos de 5 centavos
+          const steps = Math.floor(Math.random() * Math.max(10, Math.floor(maxItemPrice / 5))) + 10;
+          priceCents = steps * 5;
+        } else {
+          // Centavos quebrados (incluindo terminações em 1, 2, 3, 4, 6, 7, 8, 9 centavos)
+          priceCents = Math.floor(Math.random() * Math.max(150, maxItemPrice - 100)) + 105;
+        }
+        return { ...prod, priceCents };
+      });
+
+      const minItemsRequired = diff === 1 ? 2 : 3;
+
+      m2Scenario = {
+        walletItems,
+        walletTotalCents,
+        products,
+        minItemsRequired
+      };
+
+      document.getElementById("m2-mission-goal").innerHTML =
+        `<i class="fa-solid fa-bullseye mr-1"></i> Meta: Compre pelo menos <strong>${minItemsRequired} produtos</strong> sem ultrapassar seu saldo de <strong>${formatBRL(walletTotalCents)}</strong>.`;
+
+      renderM2Shop();
+    };
+
+    function renderM2Shop() {
+      // Carteira
+      document.getElementById("m2-wallet-total").textContent = formatBRL(m2Scenario.walletTotalCents);
+      document.getElementById("m2-wallet-display").innerHTML = m2Scenario.walletItems.map(item => `
+        <span class="px-2.5 py-1 rounded-lg border text-xs font-bold ${item.color}">
+          ${item.short} (${item.type === 'coin' ? 'Moeda' : 'Cédula'})
+        </span>
+      `).join("");
+
+      // Produtos
+      document.getElementById("m2-products-grid").innerHTML = m2Scenario.products.map(p => `
+        <button type="button" onclick="addProductToCart('${p.id}')"
+                class="bg-zinc-950 hover:bg-zinc-800 border border-zinc-800 hover:border-yellow-400 rounded-xl p-3.5 text-left transition flex flex-col justify-between">
+          <div class="flex items-center justify-between mb-2">
+            <span class="w-9 h-9 rounded-lg bg-zinc-900 border border-zinc-700 flex items-center justify-center text-yellow-400">
+              <i class="fa-solid ${p.icon}"></i>
+            </span>
+            <span class="text-xs font-extrabold text-emerald-400 bg-emerald-500/10 px-2 py-0.5 rounded">
+              ${formatBRL(p.priceCents)}
+            </span>
+          </div>
+          <span class="text-xs sm:text-sm font-bold text-white leading-tight">${p.name}</span>
+        </button>
+      `).join("");
+
+      renderM2Cart();
+    }
+
+    window.addProductToCart = function(prodId) {
+      const prod = m2Scenario.products.find(p => p.id === prodId);
+      if (!prod) return;
+
+      const currentTotal = m2Cart.reduce((acc, i) => acc + i.priceCents, 0);
+      const alertBox = document.getElementById("m2-shop-alert");
+
+      if (currentTotal + prod.priceCents > m2Scenario.walletTotalCents) {
+        alertBox.classList.remove("hidden");
+        alertBox.textContent = `Saldo insuficiente! Adicionar "${prod.name}" (${formatBRL(prod.priceCents)}) ultrapassa os ${formatBRL(m2Scenario.walletTotalCents)} da sua carteira.`;
+        return;
+      }
+
+      alertBox.classList.add("hidden");
+      m2Cart.push(prod);
+      renderM2Cart();
+    };
+
+    window.removeProductFromCart = function(index) {
+      m2Cart.splice(index, 1);
+      document.getElementById("m2-shop-alert").classList.add("hidden");
+      renderM2Cart();
+    };
+
+    window.clearM2Cart = function() {
+      m2Cart = [];
+      document.getElementById("m2-shop-alert").classList.add("hidden");
+      renderM2Cart();
+    };
+
+    function renderM2Cart() {
+      const list = document.getElementById("m2-cart-list");
+      if (m2Cart.length === 0) {
+        list.innerHTML = `<p class="text-zinc-500 text-xs text-center my-auto">Nenhum produto selecionado.</p>`;
+      } else {
+        list.innerHTML = m2Cart.map((item, idx) => `
+          <div class="flex items-center justify-between bg-zinc-900 px-3 py-2 rounded-lg text-xs">
+            <span class="font-semibold text-zinc-200">${item.name}</span>
+            <div class="flex items-center gap-2">
+              <span class="font-bold text-emerald-400">${formatBRL(item.priceCents)}</span>
+              <button onclick="removeProductFromCart(${idx})" class="text-red-400 hover:text-red-300">
+                <i class="fa-solid fa-xmark"></i>
+              </button>
+            </div>
+          </div>
+        `).join("");
+      }
+
+      const total = m2Cart.reduce((acc, i) => acc + i.priceCents, 0);
+      document.getElementById("m2-cart-total").textContent = formatBRL(total);
+    }
+
+    window.proceedToPayment = function() {
+      const alertBox = document.getElementById("m2-shop-alert");
+      if (m2Cart.length < m2Scenario.minItemsRequired) {
+        alertBox.classList.remove("hidden");
+        alertBox.textContent = `Escolha pelo menos ${m2Scenario.minItemsRequired} itens antes de ir para o caixa.`;
+        return;
+      }
+
+      document.getElementById("m2-step-shop").classList.add("hidden");
+      document.getElementById("m2-step-checkout").classList.remove("hidden");
+      document.getElementById("m2-checkout-feedback").classList.add("hidden");
+
+      m2SelectedWalletIndices = [];
+      m2ChangeTray = [];
+      renderCheckoutUI();
+    };
+
+    window.backToShop = function() {
+      document.getElementById("m2-step-checkout").classList.add("hidden");
+      document.getElementById("m2-step-shop").classList.remove("hidden");
+    };
+
+    window.toggleWalletPieceForPayment = function(idx) {
+      const pos = m2SelectedWalletIndices.indexOf(idx);
+      if (pos >= 0) {
+        m2SelectedWalletIndices.splice(pos, 1);
+      } else {
+        m2SelectedWalletIndices.push(idx);
+      }
+      renderCheckoutUI();
+    };
+
+    window.addToM2Change = function(denomId) {
+      const item = DENOMINATIONS.find(d => d.id === denomId);
+      if (!item) return;
+      m2ChangeTray.push(item);
+      renderCheckoutUI();
+    };
+
+    window.removeFromM2Change = function(idx) {
+      m2ChangeTray.splice(idx, 1);
+      renderCheckoutUI();
+    };
+
+    window.clearM2ChangeTray = function() {
+      m2ChangeTray = [];
+      renderCheckoutUI();
+    };
+
+    function renderCheckoutUI() {
+      const purchaseTotal = m2Cart.reduce((acc, i) => acc + i.priceCents, 0);
+      const paidTotal = m2SelectedWalletIndices.reduce((acc, idx) => acc + m2Scenario.walletItems[idx].cents, 0);
+      const changeTotal = m2ChangeTray.reduce((acc, i) => acc + i.cents, 0);
+
+      document.getElementById("chk-purchase-total").textContent = formatBRL(purchaseTotal);
+      document.getElementById("chk-paid-total").textContent = formatBRL(paidTotal);
+      document.getElementById("chk-change-total").textContent = formatBRL(changeTotal);
+
+      // Carteira selecionável
+      document.getElementById("chk-wallet-selectable").innerHTML = m2Scenario.walletItems.map((item, idx) => {
+        const isSelected = m2SelectedWalletIndices.includes(idx);
+        return `
+          <button type="button" onclick="toggleWalletPieceForPayment(${idx})"
+                  class="px-4 py-2.5 rounded-xl border-2 text-xs font-extrabold transition flex items-center gap-2 ${
+                    isSelected
+                      ? 'border-yellow-400 bg-yellow-400 text-black scale-105 shadow-lg'
+                      : `${item.color} opacity-85 hover:opacity-100`
+                  }">
+            <i class="fa-solid ${isSelected ? 'fa-square-check' : 'fa-square'}"></i>
+            <span>${item.short} (${item.type === 'coin' ? 'Moeda' : 'Cédula'})</span>
+          </button>
+        `;
+      }).join("");
+
+      // Bandeja de troco
+      const changeContainer = document.getElementById("chk-change-tray");
+      if (m2ChangeTray.length === 0) {
+        changeContainer.innerHTML = `<span class="text-xs text-zinc-500">Nenhuma peça selecionada para o troco.</span>`;
+      } else {
+        changeContainer.innerHTML = m2ChangeTray.map((item, idx) => `
+          <button type="button" onclick="removeFromM2Change(${idx})"
+                  class="px-2.5 py-1.5 rounded-lg border text-xs font-bold flex items-center gap-1.5 ${item.color}">
+            <span>${item.short}</span>
+            <i class="fa-solid fa-xmark text-[10px]"></i>
+          </button>
+        `).join("");
+      }
+    }
+
+    window.verifyM2Checkout = async function() {
+      m2Attempts++;
+      const purchaseTotal = m2Cart.reduce((acc, i) => acc + i.priceCents, 0);
+      const paidTotal = m2SelectedWalletIndices.reduce((acc, idx) => acc + m2Scenario.walletItems[idx].cents, 0);
+      const changeTotal = m2ChangeTray.reduce((acc, i) => acc + i.cents, 0);
+
+      const fb = document.getElementById("m2-checkout-feedback");
+      fb.classList.remove("hidden", "bg-red-500/20", "text-red-300", "border-red-500/40", "bg-emerald-500/20", "text-emerald-300", "border-emerald-500/40");
+      fb.classList.add("border");
+
+      if (paidTotal < purchaseTotal) {
+        fb.classList.add("bg-red-500/20", "text-red-300", "border-red-500/40");
+        fb.innerHTML = `<i class="fa-solid fa-circle-xmark mr-1"></i> O valor entregue (${formatBRL(paidTotal)}) é menor que o total da compra (${formatBRL(purchaseTotal)}). Selecione mais cédulas ou moedas da sua carteira.`;
+        return;
+      }
+
+      const expectedChange = paidTotal - purchaseTotal;
+      if (changeTotal !== expectedChange) {
+        fb.classList.add("bg-red-500/20", "text-red-300", "border-red-500/40");
+        fb.innerHTML = `<i class="fa-solid fa-calculator mr-1"></i> Erro no cálculo do troco! Você pagou ${formatBRL(paidTotal)} por uma compra de ${formatBRL(purchaseTotal)}, mas montou ${formatBRL(changeTotal)} na gaveta do caixa.`;
+        return;
+      }
+
+      // Acerto!
+      fb.classList.add("bg-emerald-500/20", "text-emerald-300", "border-emerald-500/40");
+      fb.innerHTML = `<i class="fa-solid fa-circle-check mr-1"></i> Perfeito! Compra de ${formatBRL(purchaseTotal)}, pagamento de ${formatBRL(paidTotal)} e troco exato de ${formatBRL(expectedChange)}. Clique em "Nova Compra" para praticar novamente.`;
+
+      sessionScore++;
+      document.getElementById("session-score").textContent = sessionScore;
+
+      await saveReportRecord({
+        module: "Mercadinho & Troco",
+        detail: `Carteira: ${formatBRL(m2Scenario.walletTotalCents)} | Compra (${m2Cart.length} itens): ${formatBRL(purchaseTotal)} | Pago: ${formatBRL(paidTotal)} | Troco: ${formatBRL(expectedChange)}`,
+        attempts: m2Attempts,
+        status: "Concluído"
+      });
+    };
+
+    // =========================================================================
+    // 7. PERSISTÊNCIA DE RELATÓRIOS (FIRESTORE + FALLBACK LOCAL)
+    // =========================================================================
+    async function saveReportRecord(data) {
+      if (!currentStudent) return;
+      const now = new Date();
+      const record = {
+        timestamp: now.toISOString(),
+        dateFormatted: now.toLocaleDateString("pt-BR") + " " + now.toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit" }),
+        studentName: currentStudent.name,
+        studentClass: currentStudent.className,
+        module: data.module,
+        detail: data.detail,
+        attempts: data.attempts,
+        status: data.status
+      };
+
+      // Salva localmente
+      const localList = JSON.parse(localStorage.getItem("fin_lab_reports") || "[]");
+      localList.unshift(record);
+      localStorage.setItem("fin_lab_reports", JSON.stringify(localList));
+
+      // Salva no Firestore
+      if (firebaseReady) {
+        try {
+          await addDoc(collection(db, "fin_educacao_relatorios"), record);
+        } catch (e) {
+          console.error("Erro ao salvar relatório no Firestore:", e);
+        }
+      }
+    }
+
+    // =========================================================================
+    // 8. NAVEGAÇÃO DO ALUNO
+    // =========================================================================
+    document.getElementById("student-login-form").addEventListener("submit", (e) => {
+      e.preventDefault();
+      const name = document.getElementById("input-student-name").value.trim();
+      const className = document.getElementById("input-student-class").value.trim();
+      if (!name || !className) return;
+
+      currentStudent = { name, className };
+      document.getElementById("header-student-name").textContent = name;
+      document.getElementById("header-student-class").textContent = `(${className})`;
+      document.getElementById("student-pill").classList.remove("hidden");
+      document.getElementById("student-pill").classList.add("flex");
+
+      document.getElementById("screen-login").classList.add("hidden");
+      document.getElementById("screen-student").classList.remove("hidden");
+
+      generateExchangeChallenge();
+      generateMarketScenario();
+    });
+
+    window.logoutStudent = function() {
+      currentStudent = null;
+      sessionScore = 0;
+      document.getElementById("session-score").textContent = "0";
+      document.getElementById("student-pill").classList.add("hidden");
+      document.getElementById("screen-student").classList.add("hidden");
+      document.getElementById("screen-login").classList.remove("hidden");
+    };
+
+    window.switchModule = function(modNum) {
+      const tab1 = document.getElementById("tab-mod1");
+      const tab2 = document.getElementById("tab-mod2");
+      const mod1 = document.getElementById("module-1-container");
+      const mod2 = document.getElementById("module-2-container");
+
+      if (modNum === 1) {
+        tab1.className = "px-4 py-2.5 rounded-xl font-bold text-sm flex items-center gap-2 bg-yellow-400 text-black transition";
+        tab2.className = "px-4 py-2.5 rounded-xl font-bold text-sm flex items-center gap-2 bg-zinc-800 text-zinc-300 hover:bg-zinc-700 transition";
+        mod1.classList.remove("hidden");
+        mod2.classList.add("hidden");
+      } else {
+        tab2.className = "px-4 py-2.5 rounded-xl font-bold text-sm flex items-center gap-2 bg-yellow-400 text-black transition";
+        tab1.className = "px-4 py-2.5 rounded-xl font-bold text-sm flex items-center gap-2 bg-zinc-800 text-zinc-300 hover:bg-zinc-700 transition";
+        mod2.classList.remove("hidden");
+        mod1.classList.add("hidden");
+      }
+    };
+
+    // =========================================================================
+    // 9. PAINEL DO PROFESSOR (AUTENTICAÇÃO, RELATÓRIOS, UPLOAD STORAGE, BACKUP)
+    // =========================================================================
+    window.openTeacherModal = function() {
+      document.getElementById("teacher-auth-error").classList.add("hidden");
+      document.getElementById("teacher-pass-input").value = "";
+      document.getElementById("teacher-auth-modal").classList.remove("hidden");
+      setTimeout(() => document.getElementById("teacher-pass-input").focus(), 100);
+    };
+
+    window.closeTeacherModal = function() {
+      document.getElementById("teacher-auth-modal").classList.add("hidden");
+    };
+
+    window.verifyTeacherPassword = async function() {
+      const typed = document.getElementById("teacher-pass-input").value;
+      if (typed === appSettings.adminPass) {
+        closeTeacherModal();
+        document.getElementById("screen-login").classList.add("hidden");
+        document.getElementById("screen-student").classList.add("hidden");
+        document.getElementById("screen-teacher").classList.remove("hidden");
+        await loadReportsFromFirebase();
+        renderMediaManager();
+      } else {
+        document.getElementById("teacher-auth-error").classList.remove("hidden");
+      }
+    };
+
+    window.exitTeacherPanel = function() {
+      document.getElementById("screen-teacher").classList.add("hidden");
+      if (currentStudent) {
+        document.getElementById("screen-student").classList.remove("hidden");
+      } else {
+        document.getElementById("screen-login").classList.remove("hidden");
+      }
+    };
+
+    window.switchTeacherTab = function(tabName) {
+      ["reports", "media", "settings"].forEach(t => {
+        const btn = document.getElementById(`ptab-${t}`);
+        const div = document.getElementById(`teacher-tab-${t}`);
+        if (t === tabName) {
+          btn.className = "px-4 py-2 rounded-xl text-xs sm:text-sm font-bold bg-yellow-400 text-black";
+          div.classList.remove("hidden");
+        } else {
+          btn.className = "px-4 py-2 rounded-xl text-xs sm:text-sm font-bold bg-zinc-800 text-zinc-300 hover:bg-zinc-700";
+          div.classList.add("hidden");
+        }
+      });
+    };
+
+    window.loadReportsFromFirebase = async function() {
+      const localList = JSON.parse(localStorage.getItem("fin_lab_reports") || "[]");
+      if (firebaseReady) {
+        try {
+          const q = query(collection(db, "fin_educacao_relatorios"), orderBy("timestamp", "desc"));
+          const snap = await getDocs(q);
+          allReports = [];
+          snap.forEach(d => allReports.push(d.data()));
+        } catch (e) {
+          console.warn("Usando histórico local:", e);
+          allReports = localList;
+        }
+      } else {
+        allReports = localList;
+      }
+
+      // Popula filtro de turmas
+      const classSelect = document.getElementById("filter-class");
+      const currentVal = classSelect.value;
+      const classes = [...new Set(allReports.map(r => r.studentClass).filter(Boolean))].sort();
+      classSelect.innerHTML = `<option value="ALL">Todas as Turmas</option>` +
+        classes.map(c => `<option value="${c}">${c}</option>`).join("");
+      if (classes.includes(currentVal)) classSelect.value = currentVal;
+
+      renderReportsTable();
+    };
+
+    window.renderReportsTable = function() {
+      const fClass = document.getElementById("filter-class").value;
+      const fMod = document.getElementById("filter-module").value;
+      const fName = document.getElementById("filter-student").value.trim().toLowerCase();
+
+      const filtered = allReports.filter(r => {
+        if (fClass !== "ALL" && r.studentClass !== fClass) return false;
+        if (fMod !== "ALL" && r.module !== fMod) return false;
+        if (fName && !r.studentName.toLowerCase().includes(fName)) return false;
+        return true;
+      });
+
+      const tbody = document.getElementById("reports-tbody");
+      if (filtered.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="7" class="p-6 text-center text-zinc-500">Nenhum registro encontrado para os filtros selecionados.</td></tr>`;
+        return;
+      }
+
+      tbody.innerHTML = filtered.map(r => `
+        <tr class="hover:bg-zinc-800/40">
+          <td class="p-3 whitespace-nowrap text-zinc-300">${r.dateFormatted || "-"}</td>
+          <td class="p-3 font-bold text-white">${r.studentName}</td>
+          <td class="p-3 text-zinc-300">${r.studentClass}</td>
+          <td class="p-3 font-semibold text-yellow-400">${r.module}</td>
+          <td class="p-3 text-xs text-zinc-300 max-w-md">${r.detail}</td>
+          <td class="p-3 text-center font-bold">${r.attempts}</td>
+          <td class="p-3 text-center">
+            <span class="px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-300 text-xs font-bold">${r.status}</span>
+          </td>
+        </tr>
+      `).join("");
+    };
+
+    window.printReport = function() {
+      const fClass = document.getElementById("filter-class").value;
+      const fMod = document.getElementById("filter-module").value;
+      const dateNow = new Date().toLocaleDateString("pt-BR");
+      document.getElementById("print-meta-info").textContent =
+        `Data de Emissão: ${dateNow} | Turma: ${fClass === "ALL" ? "Todas" : fClass} | Módulo: ${fMod === "ALL" ? "Todos" : fMod}`;
+      window.print();
+    };
+
+    // Gerenciador de Imagens (Firebase Storage + Firestore)
+    function renderMediaManager() {
+      const grid = document.getElementById("media-manager-grid");
+      grid.innerHTML = DENOMINATIONS.map(item => `
+        <div class="bg-zinc-900 border border-zinc-800 rounded-2xl p-4 flex flex-col justify-between space-y-3">
+          <div class="flex items-center justify-between">
+            <div>
+              <span class="text-[10px] uppercase font-bold tracking-wider ${item.type === 'coin' ? 'text-yellow-400' : 'text-emerald-400'}">
+                ${item.type === 'coin' ? 'Moeda' : 'Cédula'}
+              </span>
+              <h4 class="font-bold text-white text-base">${item.label}</h4>
+            </div>
+            <div class="w-16 h-12 bg-zinc-950 border border-zinc-800 rounded-lg flex items-center justify-center overflow-hidden">
+              ${item.imageUrl
+                ? `<img src="${item.imageUrl}" class="max-h-full max-w-full object-contain" />`
+                : `<span class="text-xs font-bold text-zinc-500">${item.short}</span>`
+              }
+            </div>
+          </div>
+
+          <div class="space-y-2">
+            <label class="block text-[11px] text-zinc-400 font-semibold">Enviar Arquivo (Firebase Storage):</label>
+            <input type="file" accept="image/*" onchange="uploadDenominationImage('${item.id}', event)"
+                   class="w-full text-xs text-zinc-300 file:mr-2 file:py-1.5 file:px-3 file:rounded-lg file:border-0 file:text-xs file:font-bold file:bg-yellow-400 file:text-black hover:file:bg-yellow-300" />
+          </div>
+
+          <div class="flex gap-2">
+            <input type="url" id="url-input-${item.id}" value="${item.imageUrl || ''}" placeholder="Ou cole a URL da imagem..."
+                   class="flex-1 bg-zinc-950 border border-zinc-700 rounded-lg px-2.5 py-1.5 text-xs text-white" />
+            <button onclick="saveDenominationUrl('${item.id}')" class="bg-emerald-500 hover:bg-emerald-400 text-black font-bold px-3 py-1.5 rounded-lg text-xs">
+              Salvar
+            </button>
+          </div>
+        </div>
+      `).join("");
+    }
+
+    window.uploadDenominationImage = async function(denomId, event) {
+      const file = event.target.files[0];
+      if (!file) return;
+
+      if (!firebaseReady || !storage) {
+        alert("Configure o Firebase Storage no topo do código para fazer upload de arquivos, ou cole uma URL externa.");
+        return;
+      }
+
+      try {
+        const storageRef = ref(storage, `moedas_cedulas/${denomId}_${Date.now()}_${file.name}`);
+        await uploadBytes(storageRef, file);
+        const downloadUrl = await getDownloadURL(storageRef);
+        document.getElementById(`url-input-${denomId}`).value = downloadUrl;
+        await saveDenominationUrl(denomId);
+        alert("Imagem enviada e vinculada com sucesso!");
+      } catch (err) {
+        console.error("Erro no upload:", err);
+        alert("Falha ao enviar imagem para o Firebase Storage. Verifique as regras de permissão do Storage.");
+      }
+    };
+
+    window.saveDenominationUrl = async function(denomId) {
+      const url = document.getElementById(`url-input-${denomId}`).value.trim();
+      const item = DENOMINATIONS.find(d => d.id === denomId);
+      if (!item) return;
+
+      item.imageUrl = url;
+
+      // Salva no localStorage
+      const mediaMap = {};
+      DENOMINATIONS.forEach(d => { if (d.imageUrl) mediaMap[d.id] = d.imageUrl; });
+      localStorage.setItem("fin_lab_media", JSON.stringify(mediaMap));
+
+      // Salva no Firestore
+      if (firebaseReady) {
+        try {
+          await setDoc(doc(db, "fin_educacao_moedas", denomId), {
+            id: denomId,
+            label: item.label,
+            imageUrl: url
+          });
+        } catch (e) {
+          console.error("Erro ao salvar URL no Firestore:", e);
+        }
+      }
+
+      renderMediaManager();
+      renderPalettes();
+    };
+
+    // Configurações e Backup JSON
+    window.saveTeacherSettings = async function() {
+      appSettings.difficulty = Number(document.getElementById("cfg-difficulty").value);
+      appSettings.showSum = document.getElementById("cfg-show-sum").checked;
+      const newPass = document.getElementById("cfg-admin-pass").value.trim();
+      if (newPass) appSettings.adminPass = newPass;
+
+      localStorage.setItem("fin_lab_cfg", JSON.stringify(appSettings));
+
+      if (firebaseReady) {
+        try {
+          await setDoc(doc(db, "fin_educacao_config", "geral"), appSettings);
+        } catch (e) {
+          console.error("Erro ao salvar configurações:", e);
+        }
+      }
+
+      applySettingsToUI();
+      alert("Configurações salvas com sucesso!");
+    };
+
+    window.exportBackupJSON = function() {
+      const mediaMap = {};
+      DENOMINATIONS.forEach(d => { if (d.imageUrl) mediaMap[d.id] = d.imageUrl; });
+
+      const payload = {
+        exportedAt: new Date().toISOString(),
+        settings: appSettings,
+        media: mediaMap,
+        reports: allReports
+      };
+
+      const blob = new Blob([JSON.stringify(payload, null, 2)], { type: "application/json" });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = `backup_matematica_financeira_${new Date().toISOString().slice(0, 10)}.json`;
+      a.click();
+      URL.revokeObjectURL(url);
+    };
+
+    window.importBackupJSON = async function(event) {
+      const file = event.target.files[0];
+      if (!file) return;
+
+      const reader = new FileReader();
+      reader.onload = async (e) => {
+        try {
+          const data = JSON.parse(e.target.result);
+          if (data.settings) {
+            appSettings = { ...appSettings, ...data.settings };
+            localStorage.setItem("fin_lab_cfg", JSON.stringify(appSettings));
+            if (firebaseReady) await setDoc(doc(db, "fin_educacao_config", "geral"), appSettings);
+          }
+          if (data.media) {
+            localStorage.setItem("fin_lab_media", JSON.stringify(data.media));
+            for (const [id, url] of Object.entries(data.media)) {
+              const found = DENOMINATIONS.find(d => d.id === id);
+              if (found) found.imageUrl = url;
+              if (firebaseReady) await setDoc(doc(db, "fin_educacao_moedas", id), { id, imageUrl: url });
+            }
+          }
+          if (Array.isArray(data.reports)) {
+            localStorage.setItem("fin_lab_reports", JSON.stringify(data.reports));
+            allReports = data.reports;
+          }
+          applySettingsToUI();
+          renderMediaManager();
+          renderPalettes();
+          renderReportsTable();
+          alert("Backup restaurado com sucesso!");
+        } catch (err) {
+          alert("Arquivo JSON inválido.");
+        }
+      };
+      reader.readAsText(file);
+    };
+
+    window.clearAllReports = async function() {
+      if (!confirm("Tem certeza que deseja apagar todo o histórico de relatórios?")) return;
+      localStorage.removeItem("fin_lab_reports");
+      if (firebaseReady) {
+        try {
+          const snap = await getDocs(collection(db, "fin_educacao_relatorios"));
+          for (const d of snap.docs) {
+            await deleteDoc(doc(db, "fin_educacao_relatorios", d.id));
+          }
+        } catch (e) {
+          console.error("Erro ao limpar Firestore:", e);
+        }
+      }
+      allReports = [];
+      renderReportsTable();
+    };
+
+    // Inicialização
+    loadSystemData();
+  </script>
+</body>
+</html>
