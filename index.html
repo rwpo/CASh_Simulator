@@ -228,7 +228,6 @@
            MÓDULO 1: JUNTAR UM DETERMINADO VALOR
            ======================================================= -->
       <div id="module-1-container" class="space-y-6">
-        <!-- Card do Desafio Sorteado -->
         <div class="bg-zinc-900 border-2 border-yellow-400/50 rounded-2xl p-5 sm:p-6 shadow-xl">
           <div class="flex flex-wrap items-center justify-between gap-4">
             <div class="space-y-1 flex-1">
@@ -249,7 +248,6 @@
           </div>
         </div>
 
-        <!-- Área Interativa: Bandeja do Aluno + Todas as Cédulas e Moedas -->
         <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
           <!-- Bandeja de Montagem (5 colunas) -->
           <div class="lg:col-span-5 bg-zinc-900 border border-zinc-800 rounded-2xl p-5 flex flex-col justify-between">
@@ -312,20 +310,19 @@
            ======================================================= -->
       <div id="module-2-container" class="hidden space-y-6">
 
-        <!-- Cabeçalho da Missão de Compra -->
         <div class="bg-zinc-900 border-2 border-emerald-500/40 rounded-2xl p-5 flex flex-wrap items-center justify-between gap-4">
           <div class="space-y-1">
             <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-500/15 text-emerald-300 text-xs font-bold uppercase tracking-wider">
               <i class="fa-solid fa-store"></i> Simulação de Compra com Orçamento Fixo
             </div>
             <h2 id="m2-mission-title" class="text-lg sm:text-xl font-extrabold text-white">
-              Você entrou na loja com uma carteira fechada. Escolha os itens solicitados, pague e calcule o troco!
+              Você entrou na loja com uma carteira fechada. Escolha livremente os itens que desejar, pague e calcule o troco!
             </h2>
             <p id="m2-mission-goal" class="text-sm text-amber-300 font-medium"></p>
           </div>
           <button onclick="generateMarketScenario()" class="bg-zinc-800 hover:bg-zinc-700 text-zinc-200 border border-zinc-700 px-3.5 py-2 rounded-xl text-xs font-semibold flex items-center gap-2 transition">
             <i class="fa-solid fa-rotate"></i>
-            <span>Nova Compra</span>
+            <span>Nova Carteira / Vitrine</span>
           </button>
         </div>
 
@@ -335,7 +332,7 @@
           <div class="lg:col-span-7 bg-zinc-900 border border-zinc-800 rounded-2xl p-5">
             <h3 class="font-bold text-white mb-4 flex items-center justify-between">
               <span><i class="fa-solid fa-basket-shopping text-yellow-400 mr-2"></i>Produtos da Loja</span>
-              <span class="text-xs text-zinc-400 font-normal">Clique para adicionar ao carrinho</span>
+              <span class="text-xs text-zinc-400 font-normal">Escolha quantos itens quiser dentro do seu saldo</span>
             </h3>
             <div id="m2-products-grid" class="grid grid-cols-2 sm:grid-cols-3 gap-3"></div>
           </div>
@@ -443,7 +440,7 @@
     </section>
 
     <!-- =========================================================
-         TELA 3: PAINEL DO PROFESSOR (RELATÓRIOS A4, IMAGENS E CONFIG)
+         TELA 3: PAINEL DO PROFESSOR
          ========================================================= -->
     <section id="screen-teacher" class="hidden space-y-6 print-container">
 
@@ -452,8 +449,11 @@
           <button id="ptab-reports" onclick="switchTeacherTab('reports')" class="px-4 py-2 rounded-xl text-xs sm:text-sm font-bold bg-yellow-400 text-black">
             <i class="fa-solid fa-table-list mr-1"></i> Relatórios & Impressão A4
           </button>
+          <button id="ptab-products" onclick="switchTeacherTab('products')" class="px-4 py-2 rounded-xl text-xs sm:text-sm font-bold bg-zinc-800 text-zinc-300 hover:bg-zinc-700">
+            <i class="fa-solid fa-tags mr-1"></i> Produtos da Loja
+          </button>
           <button id="ptab-media" onclick="switchTeacherTab('media')" class="px-4 py-2 rounded-xl text-xs sm:text-sm font-bold bg-zinc-800 text-zinc-300 hover:bg-zinc-700">
-            <i class="fa-solid fa-images mr-1"></i> Imagens Reais (Cédulas e Moedas)
+            <i class="fa-solid fa-images mr-1"></i> Imagens (Cédulas e Moedas)
           </button>
           <button id="ptab-settings" onclick="switchTeacherTab('settings')" class="px-4 py-2 rounded-xl text-xs sm:text-sm font-bold bg-zinc-800 text-zinc-300 hover:bg-zinc-700">
             <i class="fa-solid fa-sliders mr-1"></i> Configurações & Backup
@@ -520,7 +520,60 @@
         </div>
       </div>
 
-      <!-- SUB-ABA 2: GERENCIADOR DE IMAGENS DAS CÉDULAS E MOEDAS -->
+      <!-- SUB-ABA 2: GERENCIADOR DE PRODUTOS DA LOJA (FIRESTORE + STORAGE) -->
+      <div id="teacher-tab-products" class="no-print hidden space-y-6">
+        <div class="bg-zinc-900 border border-zinc-800 rounded-2xl p-5 space-y-4">
+          <div>
+            <h2 class="text-lg font-bold text-white">Cadastrar Novo Produto no Mercadinho</h2>
+            <p class="text-xs text-zinc-400 mt-0.5">
+              Adicione quantos produtos quiser com preço em reais e foto (upload para o Firebase Storage ou link direto). Tudo fica salvo no Firestore.
+            </p>
+          </div>
+
+          <form id="add-product-form" onsubmit="addNewStoreProduct(event)" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3 items-end">
+            <div class="lg:col-span-2">
+              <label class="block text-[11px] uppercase text-zinc-400 font-bold mb-1">Nome do Produto</label>
+              <input type="text" id="new-prod-name" required placeholder="Ex.: Estojo Escolar"
+                     class="w-full bg-zinc-950 border border-zinc-700 rounded-xl px-3 py-2.5 text-sm text-white" />
+            </div>
+
+            <div>
+              <label class="block text-[11px] uppercase text-zinc-400 font-bold mb-1">Preço (R$)</label>
+              <input type="number" step="0.01" min="0.01" id="new-prod-price" required placeholder="Ex.: 12.50"
+                     class="w-full bg-zinc-950 border border-zinc-700 rounded-xl px-3 py-2.5 text-sm text-white" />
+            </div>
+
+            <div>
+              <label class="block text-[11px] uppercase text-zinc-400 font-bold mb-1">Foto (Upload Storage)</label>
+              <input type="file" id="new-prod-file" accept="image/*"
+                     class="w-full text-xs text-zinc-300 file:mr-2 file:py-2 file:px-2.5 file:rounded-lg file:border-0 file:text-xs file:font-bold file:bg-zinc-800 file:text-yellow-400" />
+            </div>
+
+            <button type="submit" id="btn-add-product" class="bg-emerald-500 hover:bg-emerald-400 text-black font-extrabold py-2.5 px-4 rounded-xl text-sm flex items-center justify-center gap-2">
+              <i class="fa-solid fa-plus"></i> Adicionar
+            </button>
+
+            <div class="sm:col-span-2 lg:col-span-5">
+              <label class="block text-[11px] uppercase text-zinc-400 font-bold mb-1">Ou Link Direto da Imagem (Opcional)</label>
+              <input type="url" id="new-prod-url" placeholder="https://exemplo.com/imagem-produto.png"
+                     class="w-full bg-zinc-950 border border-zinc-700 rounded-xl px-3 py-2 text-xs text-white" />
+            </div>
+          </form>
+        </div>
+
+        <!-- Lista de Produtos Cadastrados -->
+        <div class="bg-zinc-900 border border-zinc-800 rounded-2xl p-5 space-y-4">
+          <div class="flex items-center justify-between">
+            <h3 class="font-bold text-white text-base">Inventário Cadastrado (<span id="products-count-label">0</span> itens)</h3>
+            <button onclick="restoreDefaultProducts()" class="text-xs bg-zinc-800 hover:bg-zinc-700 text-zinc-300 px-3 py-1.5 rounded-lg font-semibold">
+              <i class="fa-solid fa-rotate-left mr-1"></i> Restaurar Padrões
+            </button>
+          </div>
+          <div id="teacher-products-list" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4"></div>
+        </div>
+      </div>
+
+      <!-- SUB-ABA 3: GERENCIADOR DE IMAGENS DAS CÉDULAS E MOEDAS -->
       <div id="teacher-tab-media" class="no-print hidden space-y-4">
         <div class="bg-zinc-900 border border-zinc-800 rounded-2xl p-5">
           <h2 class="text-lg font-bold text-white">Cadastro de Imagens Reais (Cédulas e Moedas do Real)</h2>
@@ -532,7 +585,7 @@
         <div id="media-manager-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4"></div>
       </div>
 
-      <!-- SUB-ABA 3: CONFIGURAÇÕES PEDAGÓGICAS E BACKUP JSON -->
+      <!-- SUB-ABA 4: CONFIGURAÇÕES PEDAGÓGICAS E BACKUP JSON -->
       <div id="teacher-tab-settings" class="no-print hidden grid grid-cols-1 md:grid-cols-2 gap-6">
         <div class="bg-zinc-900 border border-zinc-800 rounded-2xl p-6 space-y-4">
           <h3 class="font-bold text-white text-base flex items-center gap-2">
@@ -542,7 +595,7 @@
           <div>
             <label class="block text-xs font-bold uppercase text-zinc-400 mb-1">Nível de Dificuldade do Sorteio</label>
             <select id="cfg-difficulty" class="w-full bg-zinc-950 border border-zinc-700 rounded-xl px-3 py-2.5 text-sm text-white">
-              <option value="1">Nível 1 — Básico (Valores inteiros: R$ 1 a R$ 150)</option>
+              <option value="1">Nível 1 — Básico (Valores inteiros)</option>
               <option value="2">Nível 2 — Intermediário (Reais + centavos de R$ 0,05, R$ 0,10, R$ 0,25, R$ 0,50)</option>
               <option value="3">Nível 3 — Completo (Centavos exatos incluindo R$ 0,01)</option>
             </select>
@@ -571,7 +624,7 @@
             <i class="fa-solid fa-database text-emerald-400"></i> Segurança e Backup de Dados (JSON)
           </h3>
           <p class="text-xs text-zinc-400">
-            Exporte uma cópia de segurança completa dos registros dos alunos, configurações e links das imagens das cédulas/moedas, ou restaure um arquivo anterior.
+            Exporte uma cópia de segurança completa dos registros dos alunos, configurações, produtos e links das imagens, ou restaure um arquivo anterior.
           </p>
 
           <button onclick="exportBackupJSON()" class="w-full bg-zinc-800 hover:bg-zinc-700 text-white font-bold py-3 rounded-xl text-sm flex items-center justify-center gap-2 border border-zinc-700">
@@ -606,7 +659,7 @@
           <i class="fa-solid fa-xmark text-lg"></i>
         </button>
       </div>
-      <p class="text-xs text-zinc-400">Digite a senha administrativa para acessar relatórios, imagens das cédulas e níveis da turma.</p>
+      <p class="text-xs text-zinc-400">Digite a senha administrativa para acessar relatórios, produtos, imagens e níveis da turma.</p>
       <input type="password" id="teacher-pass-input" placeholder="Senha (padrão: admin123)"
              onkeydown="if(event.key==='Enter') verifyTeacherPassword()"
              class="w-full bg-zinc-950 border border-zinc-700 focus:border-yellow-400 rounded-xl px-4 py-3 text-white outline-none" />
@@ -688,17 +741,18 @@
       { id: "c_10000", type: "bill", cents: 10000, label: "100 reais",       short: "R$ 100,00", color: "bg-cyan-700 border-cyan-200 text-white", imageUrl: "" }
     ];
 
-    const STORE_CATALOG = [
-      { id: "p1", name: "Caderno Brochura", icon: "fa-book" },
-      { id: "p2", name: "Caixa de Lápis", icon: "fa-pencil" },
-      { id: "p3", name: "Suco Natural", icon: "fa-glass-water" },
-      { id: "p4", name: "Sanduíche Natural", icon: "fa-burger" },
-      { id: "p5", name: "Borracha Escolar", icon: "fa-eraser" },
-      { id: "p6", name: "Régua 30cm", icon: "fa-ruler" },
-      { id: "p7", name: "Maçã", icon: "fa-apple-whole" },
-      { id: "p8", name: "Garrafa Térmica", icon: "fa-bottle-water" },
-      { id: "p9", name: "Mochila Escolar", icon: "fa-briefcase" }
+    const DEFAULT_PRODUCTS = [
+      { id: "prod_1", name: "Caderno Brochura", priceCents: 850, imageUrl: "", icon: "fa-book" },
+      { id: "prod_2", name: "Caixa de Lápis", priceCents: 600, imageUrl: "", icon: "fa-pencil" },
+      { id: "prod_3", name: "Suco Natural", priceCents: 450, imageUrl: "", icon: "fa-glass-water" },
+      { id: "prod_4", name: "Sanduíche Natural", priceCents: 900, imageUrl: "", icon: "fa-burger" },
+      { id: "prod_5", name: "Borracha Escolar", priceCents: 225, imageUrl: "", icon: "fa-eraser" },
+      { id: "prod_6", name: "Régua 30cm", priceCents: 350, imageUrl: "", icon: "fa-ruler" },
+      { id: "prod_7", name: "Maçã", priceCents: 180, imageUrl: "", icon: "fa-apple-whole" },
+      { id: "prod_8", name: "Garrafa Térmica", priceCents: 1800, imageUrl: "", icon: "fa-bottle-water" }
     ];
+
+    let storeProducts = [...DEFAULT_PRODUCTS];
 
     let appSettings = {
       difficulty: 2,
@@ -727,7 +781,7 @@
     }
 
     // =========================================================================
-    // 3. SINCRONIZAÇÃO COM FIRESTORE (CONFIGURAÇÕES E IMAGENS)
+    // 3. SINCRONIZAÇÃO COM FIRESTORE (CONFIGURAÇÕES, IMAGENS E PRODUTOS)
     // =========================================================================
     async function loadSystemData() {
       const localMedia = localStorage.getItem("fin_lab_media");
@@ -740,6 +794,13 @@
       const localCfg = localStorage.getItem("fin_lab_cfg");
       if (localCfg) {
         appSettings = { ...appSettings, ...JSON.parse(localCfg) };
+      }
+      const localProds = localStorage.getItem("fin_lab_products");
+      if (localProds) {
+        const parsedProds = JSON.parse(localProds);
+        if (Array.isArray(parsedProds) && parsedProds.length > 0) {
+          storeProducts = parsedProds;
+        }
       }
 
       if (firebaseReady) {
@@ -756,13 +817,27 @@
               found.imageUrl = docSnap.data().imageUrl;
             }
           });
+
+          const prodSnap = await getDocs(collection(db, "fin_educacao_produtos"));
+          if (!prodSnap.empty) {
+            const loaded = [];
+            prodSnap.forEach(d => loaded.push({ id: d.id, ...d.data() }));
+            storeProducts = loaded;
+            localStorage.setItem("fin_lab_products", JSON.stringify(storeProducts));
+          } else {
+            // Seed inicial no Firestore se coleção estiver vazia
+            for (const p of DEFAULT_PRODUCTS) {
+              await setDoc(doc(db, "fin_educacao_produtos", p.id), p);
+            }
+          }
         } catch (e) {
-          console.warn("Aviso ao ler configurações do Firestore:", e);
+          console.warn("Aviso ao ler dados do Firestore:", e);
         }
       }
 
       applySettingsToUI();
       renderAllPalettes();
+      renderTeacherProductsList();
     }
 
     function applySettingsToUI() {
@@ -786,7 +861,7 @@
     }
 
     // =========================================================================
-    // 4. RENDERIZAÇÃO VISUAL DE CÉDULAS E MOEDAS (IMAGEM REAL OU FALLBACK)
+    // 4. RENDERIZAÇÃO VISUAL DE CÉDULAS E MOEDAS
     // =========================================================================
     function createMoneyButtonHTML(item, onClickAttr) {
       if (item.imageUrl) {
@@ -821,7 +896,6 @@
       }
     }
 
-    // Todas as moedas e cédulas sempre disponíveis
     function renderAllPalettes() {
       const coins = DENOMINATIONS.filter(d => d.type === "coin");
       const bills = DENOMINATIONS.filter(d => d.type === "bill");
@@ -850,15 +924,12 @@
       let targetCents = 0;
 
       if (diff === 1) {
-        // Nível 1: Valores inteiros variados (entre R$ 2,00 e R$ 150,00)
         const reais = Math.floor(Math.random() * 149) + 2;
         targetCents = reais * 100;
       } else if (diff === 2) {
-        // Nível 2: Reais e centavos múltiplos de 5 centavos (entre R$ 1,05 e R$ 85,95)
         const steps = Math.floor(Math.random() * 1700) + 21;
         targetCents = steps * 5;
       } else {
-        // Nível 3: Qualquer valor em centavos incluindo moedas de 1 centavo (entre R$ 0,15 e R$ 99,99)
         targetCents = Math.floor(Math.random() * 9985) + 15;
       }
 
@@ -941,7 +1012,7 @@
     };
 
     // =========================================================================
-    // 6. GERADOR ALEATÓRIO INTELIGENTE — MÓDULO 2 (MERCADINHO & TROCO)
+    // 6. MÓDULO 2: MERCADINHO COM INVENTÁRIO LIVRE DO PROFESSOR
     // =========================================================================
     window.generateMarketScenario = function() {
       m2Cart = [];
@@ -984,34 +1055,17 @@
       const walletItems = chosenIds.map(id => DENOMINATIONS.find(d => d.id === id));
       const walletTotalCents = walletItems.reduce((acc, i) => acc + i.cents, 0);
 
-      const shuffledProducts = [...STORE_CATALOG].sort(() => 0.5 - Math.random()).slice(0, 6);
-      const maxItemPrice = Math.max(300, Math.floor(walletTotalCents * 0.65));
-
-      const products = shuffledProducts.map(prod => {
-        let priceCents = 0;
-        if (diff === 1) {
-          const reais = Math.floor(Math.random() * Math.max(2, Math.floor(maxItemPrice / 100))) + 1;
-          priceCents = reais * 100;
-        } else if (diff === 2) {
-          const steps = Math.floor(Math.random() * Math.max(10, Math.floor(maxItemPrice / 5))) + 10;
-          priceCents = steps * 5;
-        } else {
-          priceCents = Math.floor(Math.random() * Math.max(150, maxItemPrice - 100)) + 105;
-        }
-        return { ...prod, priceCents };
-      });
-
-      const minItemsRequired = diff === 1 ? 2 : 3;
+      // Usa todos os produtos cadastrados pelo professor
+      const activeProducts = storeProducts.length > 0 ? storeProducts : DEFAULT_PRODUCTS;
 
       m2Scenario = {
         walletItems,
         walletTotalCents,
-        products,
-        minItemsRequired
+        products: activeProducts
       };
 
       document.getElementById("m2-mission-goal").innerHTML =
-        `<i class="fa-solid fa-bullseye mr-1"></i> Meta: Compre pelo menos <strong>${minItemsRequired} produtos</strong> sem ultrapassar seu saldo de <strong>${formatBRL(walletTotalCents)}</strong>.`;
+        `<i class="fa-solid fa-bullseye mr-1"></i> Saldo da carteira: <strong>${formatBRL(walletTotalCents)}</strong>. Escolha livremente quantos itens quiser levar sem ultrapassar esse valor.`;
 
       renderM2Shop();
     };
@@ -1026,11 +1080,14 @@
 
       document.getElementById("m2-products-grid").innerHTML = m2Scenario.products.map(p => `
         <button type="button" onclick="addProductToCart('${p.id}')"
-                class="bg-zinc-950 hover:bg-zinc-800 border border-zinc-800 hover:border-yellow-400 rounded-xl p-3.5 text-left transition flex flex-col justify-between">
-          <div class="flex items-center justify-between mb-2">
-            <span class="w-9 h-9 rounded-lg bg-zinc-900 border border-zinc-700 flex items-center justify-center text-yellow-400">
-              <i class="fa-solid ${p.icon}"></i>
-            </span>
+                class="bg-zinc-950 hover:bg-zinc-800 border border-zinc-800 hover:border-yellow-400 rounded-xl p-3.5 text-left transition flex flex-col justify-between gap-2">
+          <div class="flex items-center justify-between w-full">
+            ${p.imageUrl
+              ? `<img src="${p.imageUrl}" alt="${p.name}" class="w-12 h-12 object-contain rounded-lg bg-zinc-900 p-1 border border-zinc-800" />`
+              : `<span class="w-10 h-10 rounded-lg bg-zinc-900 border border-zinc-700 flex items-center justify-center text-yellow-400">
+                   <i class="fa-solid ${p.icon || 'fa-tag'}"></i>
+                 </span>`
+            }
             <span class="text-xs font-extrabold text-emerald-400 bg-emerald-500/10 px-2 py-0.5 rounded">
               ${formatBRL(p.priceCents)}
             </span>
@@ -1096,9 +1153,9 @@
 
     window.proceedToPayment = function() {
       const alertBox = document.getElementById("m2-shop-alert");
-      if (m2Cart.length < m2Scenario.minItemsRequired) {
+      if (m2Cart.length === 0) {
         alertBox.classList.remove("hidden");
-        alertBox.textContent = `Escolha pelo menos ${m2Scenario.minItemsRequired} itens antes de ir para o caixa.`;
+        alertBox.textContent = `Selecione pelo menos 1 produto antes de ir para o caixa.`;
         return;
       }
 
@@ -1205,7 +1262,7 @@
       }
 
       fb.classList.add("bg-emerald-500/20", "text-emerald-300", "border-emerald-500/40");
-      fb.innerHTML = `<i class="fa-solid fa-circle-check mr-1"></i> Perfeito! Compra de ${formatBRL(purchaseTotal)}, pagamento de ${formatBRL(paidTotal)} e troco exato de ${formatBRL(expectedChange)}. Clique em "Nova Compra" para praticar novamente.`;
+      fb.innerHTML = `<i class="fa-solid fa-circle-check mr-1"></i> Perfeito! Compra de ${formatBRL(purchaseTotal)}, pagamento de ${formatBRL(paidTotal)} e troco exato de ${formatBRL(expectedChange)}.`;
 
       sessionScore++;
       document.getElementById("session-score").textContent = sessionScore;
@@ -1219,7 +1276,169 @@
     };
 
     // =========================================================================
-    // 7. PERSISTÊNCIA DE RELATÓRIOS (FIRESTORE + FALLBACK LOCAL)
+    // 7. GERENCIAMENTO DE PRODUTOS PELO PROFESSOR (FIRESTORE + STORAGE)
+    // =========================================================================
+    function renderTeacherProductsList() {
+      const listEl = document.getElementById("teacher-products-list");
+      document.getElementById("products-count-label").textContent = storeProducts.length;
+
+      if (storeProducts.length === 0) {
+        listEl.innerHTML = `<p class="text-zinc-500 text-sm col-span-full text-center py-6">Nenhum produto cadastrado.</p>`;
+        return;
+      }
+
+      listEl.innerHTML = storeProducts.map(p => `
+        <div class="bg-zinc-950 border border-zinc-800 rounded-xl p-4 flex flex-col justify-between space-y-3">
+          <div class="flex items-start justify-between gap-3">
+            <div class="flex items-center gap-3">
+              ${p.imageUrl
+                ? `<img src="${p.imageUrl}" alt="${p.name}" class="w-12 h-12 object-contain rounded-lg bg-zinc-900 p-1 border border-zinc-800" />`
+                : `<div class="w-12 h-12 rounded-lg bg-zinc-900 border border-zinc-800 flex items-center justify-center text-yellow-400">
+                     <i class="fa-solid ${p.icon || 'fa-tag'}"></i>
+                   </div>`
+              }
+              <div>
+                <h4 class="font-bold text-white text-sm">${p.name}</h4>
+                <span class="text-xs font-extrabold text-emerald-400">${formatBRL(p.priceCents)}</span>
+              </div>
+            </div>
+
+            <button onclick="deleteStoreProduct('${p.id}')" title="Excluir produto"
+                    class="text-zinc-500 hover:text-red-400 text-xs p-1.5">
+              <i class="fa-solid fa-trash"></i>
+            </button>
+          </div>
+
+          <div class="flex items-center gap-2 pt-2 border-t border-zinc-800/80">
+            <input type="number" step="0.01" min="0.01" id="edit-price-${p.id}" value="${(p.priceCents / 100).toFixed(2)}"
+                   class="w-24 bg-zinc-900 border border-zinc-700 rounded-lg px-2 py-1 text-xs text-white" />
+            <button onclick="updateStoreProductPrice('${p.id}')"
+                    class="bg-zinc-800 hover:bg-zinc-700 text-yellow-400 font-bold px-2.5 py-1 rounded-lg text-xs">
+              Atualizar Preço
+            </button>
+          </div>
+        </div>
+      `).join("");
+    }
+
+    window.addNewStoreProduct = async function(event) {
+      event.preventDefault();
+      const name = document.getElementById("new-prod-name").value.trim();
+      const priceVal = parseFloat(document.getElementById("new-prod-price").value);
+      const fileInput = document.getElementById("new-prod-file");
+      const urlInput = document.getElementById("new-prod-url");
+
+      if (!name || isNaN(priceVal) || priceVal <= 0) return;
+
+      const btn = document.getElementById("btn-add-product");
+      btn.disabled = true;
+      btn.innerHTML = `<i class="fa-solid fa-spinner fa-spin"></i> Salvando...`;
+
+      let imageUrl = urlInput.value.trim();
+
+      try {
+        if (fileInput.files && fileInput.files[0] && firebaseReady && storage) {
+          const file = fileInput.files[0];
+          const storageRef = ref(storage, `produtos/${Date.now()}_${file.name}`);
+          await uploadBytes(storageRef, file);
+          imageUrl = await getDownloadURL(storageRef);
+        }
+
+        const newProd = {
+          id: "prod_" + Date.now(),
+          name,
+          priceCents: Math.round(priceVal * 100),
+          imageUrl,
+          icon: "fa-bag-shopping"
+        };
+
+        storeProducts.push(newProd);
+        localStorage.setItem("fin_lab_products", JSON.stringify(storeProducts));
+
+        if (firebaseReady && db) {
+          await setDoc(doc(db, "fin_educacao_produtos", newProd.id), newProd);
+        }
+
+        document.getElementById("add-product-form").reset();
+        renderTeacherProductsList();
+        if (m2Scenario) {
+          m2Scenario.products = storeProducts;
+          renderM2Shop();
+        }
+        alert("Produto adicionado com sucesso!");
+      } catch (err) {
+        console.error("Erro ao adicionar produto:", err);
+        alert("Erro ao salvar produto. Verifique a conexão e as regras do Firebase.");
+      } finally {
+        btn.disabled = false;
+        btn.innerHTML = `<i class="fa-solid fa-plus"></i> Adicionar`;
+      }
+    };
+
+    window.updateStoreProductPrice = async function(prodId) {
+      const inputEl = document.getElementById(`edit-price-${prodId}`);
+      const val = parseFloat(inputEl.value);
+      if (isNaN(val) || val <= 0) return;
+
+      const prod = storeProducts.find(p => p.id === prodId);
+      if (!prod) return;
+
+      prod.priceCents = Math.round(val * 100);
+      localStorage.setItem("fin_lab_products", JSON.stringify(storeProducts));
+
+      if (firebaseReady && db) {
+        try {
+          await setDoc(doc(db, "fin_educacao_produtos", prodId), prod);
+        } catch (e) {
+          console.error("Erro ao atualizar preço:", e);
+        }
+      }
+
+      renderTeacherProductsList();
+      if (m2Scenario) renderM2Shop();
+      alert("Preço atualizado!");
+    };
+
+    window.deleteStoreProduct = async function(prodId) {
+      if (!confirm("Remover este produto da loja?")) return;
+      storeProducts = storeProducts.filter(p => p.id !== prodId);
+      localStorage.setItem("fin_lab_products", JSON.stringify(storeProducts));
+
+      if (firebaseReady && db) {
+        try {
+          await deleteDoc(doc(db, "fin_educacao_produtos", prodId));
+        } catch (e) {
+          console.error("Erro ao excluir produto:", e);
+        }
+      }
+
+      renderTeacherProductsList();
+      if (m2Scenario) {
+        m2Scenario.products = storeProducts.length > 0 ? storeProducts : DEFAULT_PRODUCTS;
+        renderM2Shop();
+      }
+    };
+
+    window.restoreDefaultProducts = async function() {
+      if (!confirm("Restaurar os produtos padrão da loja?")) return;
+      storeProducts = [...DEFAULT_PRODUCTS];
+      localStorage.setItem("fin_lab_products", JSON.stringify(storeProducts));
+
+      if (firebaseReady && db) {
+        for (const p of DEFAULT_PRODUCTS) {
+          await setDoc(doc(db, "fin_educacao_produtos", p.id), p);
+        }
+      }
+
+      renderTeacherProductsList();
+      if (m2Scenario) {
+        m2Scenario.products = storeProducts;
+        renderM2Shop();
+      }
+    };
+
+    // =========================================================================
+    // 8. PERSISTÊNCIA DE RELATÓRIOS & NAVEGAÇÃO DO ALUNO
     // =========================================================================
     async function saveReportRecord(data) {
       if (!currentStudent) return;
@@ -1248,9 +1467,6 @@
       }
     }
 
-    // =========================================================================
-    // 8. NAVEGAÇÃO DO ALUNO
-    // =========================================================================
     document.getElementById("student-login-form").addEventListener("submit", (e) => {
       e.preventDefault();
       const name = document.getElementById("input-student-name").value.trim();
@@ -1299,7 +1515,7 @@
     };
 
     // =========================================================================
-    // 9. PAINEL DO PROFESSOR (AUTENTICAÇÃO, RELATÓRIOS, UPLOAD STORAGE, BACKUP)
+    // 9. PAINEL DO PROFESSOR (RELATÓRIOS, IMAGENS, CONFIGURAÇÕES E BACKUP)
     // =========================================================================
     window.openTeacherModal = function() {
       document.getElementById("teacher-auth-error").classList.add("hidden");
@@ -1321,6 +1537,7 @@
         document.getElementById("screen-teacher").classList.remove("hidden");
         await loadReportsFromFirebase();
         renderMediaManager();
+        renderTeacherProductsList();
       } else {
         document.getElementById("teacher-auth-error").classList.remove("hidden");
       }
@@ -1336,7 +1553,7 @@
     };
 
     window.switchTeacherTab = function(tabName) {
-      ["reports", "media", "settings"].forEach(t => {
+      ["reports", "products", "media", "settings"].forEach(t => {
         const btn = document.getElementById(`ptab-${t}`);
         const div = document.getElementById(`teacher-tab-${t}`);
         if (t === tabName) {
@@ -1530,6 +1747,7 @@
         exportedAt: new Date().toISOString(),
         settings: appSettings,
         media: mediaMap,
+        products: storeProducts,
         reports: allReports
       };
 
@@ -1563,12 +1781,22 @@
               if (firebaseReady) await setDoc(doc(db, "fin_educacao_moedas", id), { id, imageUrl: url });
             }
           }
+          if (Array.isArray(data.products)) {
+            storeProducts = data.products;
+            localStorage.setItem("fin_lab_products", JSON.stringify(storeProducts));
+            if (firebaseReady) {
+              for (const p of storeProducts) {
+                await setDoc(doc(db, "fin_educacao_produtos", p.id), p);
+              }
+            }
+          }
           if (Array.isArray(data.reports)) {
             localStorage.setItem("fin_lab_reports", JSON.stringify(data.reports));
             allReports = data.reports;
           }
           applySettingsToUI();
           renderMediaManager();
+          renderTeacherProductsList();
           renderAllPalettes();
           renderReportsTable();
           alert("Backup restaurado com sucesso!");
