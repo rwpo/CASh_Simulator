@@ -934,11 +934,18 @@
           }
 
           const mediaSnap = await getDocs(collection(db, "fin_educacao_moedas"));
-          mediaSnap.forEach(docSnap => {
-            const found = DENOMINATIONS.find(d => d.id === docSnap.id);
-            if (found && docSnap.data().imageUrl) {
-              found.imageUrl = docSnap.data().imageUrl;
-            }
+const syncedMedia = {};
+mediaSnap.forEach(docSnap => {
+  const data = docSnap.data();
+  const found = DENOMINATIONS.find(d => d.id === docSnap.id);
+  if (found && data.imageUrl) {
+    found.imageUrl = data.imageUrl;
+    syncedMedia[docSnap.id] = data.imageUrl;
+  }
+});
+if (Object.keys(syncedMedia).length > 0) {
+  localStorage.setItem("fin_lab_media", JSON.stringify(syncedMedia));
+}
           });
 
           const prodSnap = await getDocs(collection(db, "fin_educacao_produtos"));
