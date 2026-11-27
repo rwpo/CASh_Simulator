@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Laboratório de Educação Financeira — Sistema Monetário Brasileiro</title>
+  <title>Laboratório de Educação Financeira v1.0 — Sistema Monetário Brasileiro</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
   <style>
@@ -133,7 +133,9 @@
           R$
         </div>
         <div>
-          <h1 class="font-bold text-base sm:text-lg text-white leading-tight">Laboratório de Educação Financeira</h1>
+          <h1 class="font-bold text-base sm:text-lg text-white leading-tight">
+            Laboratório de Educação Financeira <span class="text-xs font-extrabold text-yellow-400 ml-1">v1.0</span>
+          </h1>
           <p class="text-xs text-zinc-400 flex items-center gap-2">
             <span>Composição de Valores e Troco</span>
             <span id="firebase-status-badge" class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-semibold bg-zinc-800 text-zinc-300">
@@ -375,7 +377,6 @@
       <div id="module-2-container" class="hidden space-y-6">
 
         <div id="m2-quiz-active" class="space-y-6">
-          <!-- Barra de Progresso das 10 Perguntas -->
           <div class="bg-zinc-900 border border-zinc-800 rounded-2xl p-4 space-y-2">
             <div class="flex items-center justify-between text-xs sm:text-sm font-bold">
               <span id="m2-question-counter" class="text-emerald-400">Pergunta 1 de 10</span>
@@ -708,7 +709,7 @@
         <div class="bg-zinc-900 border border-zinc-800 rounded-2xl p-5">
           <h2 class="text-lg font-bold text-white">Cadastro de Imagens Reais (Cédulas e Moedas do Real)</h2>
           <p class="text-xs text-zinc-400 mt-1">
-            Envie arquivos PNG/JPG diretamente para o <strong>Firebase Storage</strong> ou cole a URL da imagem. As alterações são salvas no <strong>Firestore</strong> e atualizadas automaticamente para todos os alunos.
+            Envie arquivos PNG/JPG diretamente para o <strong>Firebase Storage</strong> ou cole a URL da imagem. As alterações são salvas no <strong>Firestore</strong> e sincronizadas entre computadores.
           </p>
         </div>
 
@@ -810,12 +811,12 @@
   </div>
 
   <!-- =========================================================
-       LÓGICA DA APLICAÇÃO + INTEGRAÇÃO FIREBASE
+       LÓGICA DA APLICAÇÃO + INTEGRAÇÃO FIREBASE (VERSÃO 1.0)
        ========================================================= -->
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
     import {
-      getFirestore, collection, doc, setDoc, getDoc, getDocs, addDoc, deleteDoc, query, orderBy
+      getFirestore, collection, doc, setDoc, getDoc, getDocs, deleteDoc, query, orderBy
     } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
     import {
       getStorage, ref, uploadBytes, getDownloadURL
@@ -886,14 +887,12 @@
     let sessionScore = 0;
     let allReports = [];
 
-    // Estado Módulo 1 (10 Questões)
     const M1_TOTAL_QUESTIONS = 10;
     let m1QuestionsList = [];
     let m1CurrentIndex = 0;
     let m1Tray = [];
     let m1Results = [];
 
-    // Estado Módulo 2 (10 Perguntas)
     const M2_TOTAL_QUESTIONS = 10;
     let m2CurrentIndex = 0;
     let m2Results = [];
@@ -909,20 +908,34 @@
     async function loadSystemData() {
       const localMedia = localStorage.getItem("fin_lab_media");
       if (localMedia) {
-        const parsed = JSON.parse(localMedia);
-        DENOMINATIONS.forEach(d => {
-          if (parsed[d.id]) d.imageUrl = parsed[d.id];
-        });
+        try {
+          const parsed = JSON.parse(localMedia);
+          DENOMINATIONS.forEach(d => {
+            if (parsed[d.id]) d.imageUrl = parsed[d.id];
+          });
+        } catch (e) {
+          console.warn("Erro ao ler fin_lab_media local:", e);
+        }
       }
+
       const localCfg = localStorage.getItem("fin_lab_cfg");
       if (localCfg) {
-        appSettings = { ...appSettings, ...JSON.parse(localCfg) };
+        try {
+          appSettings = { ...appSettings, ...JSON.parse(localCfg) };
+        } catch (e) {
+          console.warn("Erro ao ler fin_lab_cfg local:", e);
+        }
       }
+
       const localProds = localStorage.getItem("fin_lab_products");
       if (localProds) {
-        const parsedProds = JSON.parse(localProds);
-        if (Array.isArray(parsedProds) && parsedProds.length > 0) {
-          storeProducts = parsedProds;
+        try {
+          const parsedProds = JSON.parse(localProds);
+          if (Array.isArray(parsedProds) && parsedProds.length > 0) {
+            storeProducts = parsedProds;
+          }
+        } catch (e) {
+          console.warn("Erro ao ler fin_lab_products local:", e);
         }
       }
 
@@ -931,22 +944,22 @@
           const cfgSnap = await getDoc(doc(db, "fin_educacao_config", "geral"));
           if (cfgSnap.exists()) {
             appSettings = { ...appSettings, ...cfgSnap.data() };
+            localStorage.setItem("fin_lab_cfg", JSON.stringify(appSettings));
           }
 
           const mediaSnap = await getDocs(collection(db, "fin_educacao_moedas"));
-const syncedMedia = {};
-mediaSnap.forEach(docSnap => {
-  const data = docSnap.data();
-  const found = DENOMINATIONS.find(d => d.id === docSnap.id);
-  if (found && data.imageUrl) {
-    found.imageUrl = data.imageUrl;
-    syncedMedia[docSnap.id] = data.imageUrl;
-  }
-});
-if (Object.keys(syncedMedia).length > 0) {
-  localStorage.setItem("fin_lab_media", JSON.stringify(syncedMedia));
-}
+          const syncedMedia = {};
+          mediaSnap.forEach(docSnap => {
+            const data = docSnap.data();
+            const found = DENOMINATIONS.find(d => d.id === docSnap.id);
+            if (found) {
+              found.imageUrl = data.imageUrl || "";
+              if (data.imageUrl) {
+                syncedMedia[docSnap.id] = data.imageUrl;
+              }
+            }
           });
+          localStorage.setItem("fin_lab_media", JSON.stringify(syncedMedia));
 
           const prodSnap = await getDocs(collection(db, "fin_educacao_produtos"));
           if (!prodSnap.empty) {
@@ -967,7 +980,11 @@ if (Object.keys(syncedMedia).length > 0) {
       applySettingsToUI();
       renderAllPalettes();
       renderTeacherProductsList();
-      if (m2Scenario) renderM2Shop();
+      renderMediaManager();
+      if (m2Scenario) {
+        m2Scenario.products = storeProducts.length > 0 ? storeProducts : DEFAULT_PRODUCTS;
+        renderM2Shop();
+      }
     }
 
     function applySettingsToUI() {
@@ -1049,9 +1066,6 @@ if (Object.keys(syncedMedia).length > 0) {
         .map(b => createMoneyButtonHTML(b, `addToM2Change('${b.id}')`)).join("");
     }
 
-    // =========================================================================
-    // MÓDULO 1: 10 QUESTÕES + RESULTADO FINAL
-    // =========================================================================
     function generateSingleTargetCents(diff) {
       if (diff === 1) {
         const reais = Math.floor(Math.random() * 149) + 2;
@@ -1223,9 +1237,6 @@ if (Object.keys(syncedMedia).length > 0) {
       `).join("");
     }
 
-    // =========================================================================
-    // MÓDULO 2: 10 PERGUNTAS + RELATÓRIO FINAL
-    // =========================================================================
     window.startNewM2Quiz = function() {
       m2CurrentIndex = 0;
       m2Results = [];
@@ -1558,9 +1569,6 @@ if (Object.keys(syncedMedia).length > 0) {
       `).join("");
     }
 
-    // =========================================================================
-    // GERENCIAMENTO DE PRODUTOS PELO PROFESSOR
-    // =========================================================================
     function renderTeacherProductsList() {
       const listEl = document.getElementById("teacher-products-list");
       document.getElementById("products-count-label").textContent = storeProducts.length;
@@ -1720,9 +1728,6 @@ if (Object.keys(syncedMedia).length > 0) {
       }
     };
 
-    // =========================================================================
-    // PERSISTÊNCIA DE RELATÓRIOS + EXCLUSÃO INDIVIDUAL E TOTAL
-    // =========================================================================
     async function saveReportRecord(data) {
       if (!currentStudent) return;
       const now = new Date();
@@ -1791,9 +1796,6 @@ if (Object.keys(syncedMedia).length > 0) {
       alert("Histórico de relatórios apagado com sucesso!");
     };
 
-    // =========================================================================
-    // NAVEGAÇÃO DO ALUNO & PAINEL DO PROFESSOR
-    // =========================================================================
     document.getElementById("student-login-form").addEventListener("submit", (e) => {
       e.preventDefault();
       const name = document.getElementById("input-student-name").value.trim();
@@ -1998,7 +2000,7 @@ if (Object.keys(syncedMedia).length > 0) {
           <div class="flex gap-2">
             <input type="url" id="url-input-${item.id}" value="${item.imageUrl || ''}" placeholder="Ou cole a URL da imagem..."
                    class="flex-1 bg-zinc-950 border border-zinc-700 rounded-lg px-2.5 py-1.5 text-xs text-white" />
-            <button onclick="saveDenominationUrl('${item.id}')" class="bg-emerald-500 hover:bg-emerald-400 text-black font-bold px-3 py-1.5 rounded-lg text-xs">
+            <button onclick="saveDenominationUrl('${item.id}', true)" class="bg-emerald-500 hover:bg-emerald-400 text-black font-bold px-3 py-1.5 rounded-lg text-xs">
               Salvar
             </button>
           </div>
@@ -2020,15 +2022,15 @@ if (Object.keys(syncedMedia).length > 0) {
         await uploadBytes(storageRef, file);
         const downloadUrl = await getDownloadURL(storageRef);
         document.getElementById(`url-input-${denomId}`).value = downloadUrl;
-        await saveDenominationUrl(denomId);
-        alert("Imagem enviada e vinculada com sucesso!");
+        await saveDenominationUrl(denomId, true);
+        alert("Imagem enviada e sincronizada com sucesso!");
       } catch (err) {
         console.error("Erro no upload:", err);
         alert("Falha ao enviar imagem para o Firebase Storage. Verifique as regras de permissão do Storage.");
       }
     };
 
-    window.saveDenominationUrl = async function(denomId) {
+    window.saveDenominationUrl = async function(denomId, notifyUser = false) {
       const url = document.getElementById(`url-input-${denomId}`).value.trim();
       const item = DENOMINATIONS.find(d => d.id === denomId);
       if (!item) return;
@@ -2039,15 +2041,22 @@ if (Object.keys(syncedMedia).length > 0) {
       DENOMINATIONS.forEach(d => { if (d.imageUrl) mediaMap[d.id] = d.imageUrl; });
       localStorage.setItem("fin_lab_media", JSON.stringify(mediaMap));
 
-      if (firebaseReady) {
+      if (firebaseReady && db) {
         try {
           await setDoc(doc(db, "fin_educacao_moedas", denomId), {
             id: denomId,
+            type: item.type,
+            cents: item.cents,
             label: item.label,
-            imageUrl: url
+            imageUrl: url,
+            updatedAt: new Date().toISOString()
           });
+          if (notifyUser) {
+            alert(`Imagem de "${item.label}" salva no Firebase com sucesso!`);
+          }
         } catch (e) {
           console.error("Erro ao salvar URL no Firestore:", e);
+          alert("Erro ao salvar no Firestore. Verifique as regras de segurança do banco.");
         }
       }
 
@@ -2081,6 +2090,7 @@ if (Object.keys(syncedMedia).length > 0) {
       DENOMINATIONS.forEach(d => { if (d.imageUrl) mediaMap[d.id] = d.imageUrl; });
 
       const payload = {
+        version: "1.0",
         exportedAt: new Date().toISOString(),
         settings: appSettings,
         media: mediaMap,
@@ -2092,7 +2102,7 @@ if (Object.keys(syncedMedia).length > 0) {
       const url = URL.createObjectURL(blob);
       const a = document.createElement("a");
       a.href = url;
-      a.download = `backup_matematica_financeira_${new Date().toISOString().slice(0, 10)}.json`;
+      a.download = `backup_matematica_financeira_v1.0_${new Date().toISOString().slice(0, 10)}.json`;
       a.click();
       URL.revokeObjectURL(url);
     };
